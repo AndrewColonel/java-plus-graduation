@@ -1,6 +1,6 @@
 logging:
   level:
-    ru.yandex.practicum.infra.discovery-server: TRACE
+    ru.yandex.practicum.infra.discoveryserver: TRACE
     org:
       springframework: INFO
       springframework.cloud.netflix.eureka: INFO

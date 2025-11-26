@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import ru.practicum.event.EventRepository;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.State;
-import ru.practicum.exception.ConflictException;
-import ru.practicum.exception.EntityNotExistsException;
-import ru.practicum.exception.NotFoundException;
+import ru.practicum.server.exception.ConflictException;
+import ru.practicum.server.exception.EntityNotExistsException;
+import ru.practicum.server.exception.NotFoundException;
 import ru.practicum.requests.RequestRepository;
 import ru.practicum.requests.dto.RequestDto;
 import ru.practicum.requests.model.Request;
@@ -145,7 +145,7 @@ public class RequestServiceImpl implements RequestService {
      * @param requestId ID запроса
      * @return Если существует, возвращается Request
      */
-    private ru.practicum.requests.model.Request validateRequestExists(Long requestId) {
+    private Request validateRequestExists(Long requestId) {
         log.warn("validateRequestExists(Long {})", requestId);
         // Проверка на null ID
         if (requestId == null) {

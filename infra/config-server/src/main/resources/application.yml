@@ -1,6 +1,6 @@
 logging:
   level:
-    ru.yandex.practicum.infra.config-server: INFO
+    ru.practicum.infra.config: INFO
     org:
       springframework: INFO
 
@@ -21,8 +21,8 @@ spring:
       enabled: true
 
 server:
-#  port: 0
-  port: 8888
+  port: 0
+#  port: 8888
 
 management:
   endpoints:

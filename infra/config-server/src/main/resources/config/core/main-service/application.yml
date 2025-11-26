@@ -45,5 +45,8 @@ management:
       show-details: always
 
 
-stats-server:
-  url: http://localhost:9090
+discovery:
+  services:
+    stats-server-id:  stats-server
+#stats-server:
+#  url: http://localhost:9090

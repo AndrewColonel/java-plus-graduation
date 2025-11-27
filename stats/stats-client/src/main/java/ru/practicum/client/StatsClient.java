@@ -20,11 +20,9 @@ public class StatsClient {
     private final RetryTemplate retryTemplate;
     private final String statsServiceId;
 
-
     public StatsClient(@Value("${discovery.services.stats-server-id}") String statsServiceId,
                        DiscoveryClient discoveryClient) {
         this.statsServiceId = statsServiceId;
-
         this.discoveryClient = discoveryClient;
         this.retryTemplate = new RetryTemplate();
 
@@ -42,7 +40,6 @@ public class StatsClient {
 
     }
 
-
     /**
      * Сохраняет информацию о запросе к эндпоинту (POST /hit)
      *
@@ -55,7 +52,6 @@ public class StatsClient {
                 .retrieve()
                 .toBodilessEntity();
     }
-
 
     /**
      * Получает статистику по посещениям (GET /stats)
@@ -80,7 +76,6 @@ public class StatsClient {
 
         return statsArray != null ? List.of(statsArray) : List.of();
     }
-
 
     private String makeUri() {
         ServiceInstance instance = retryTemplate.execute(cxt -> getInstance());

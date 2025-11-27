@@ -1,0 +1,58 @@
+logging:
+  level:
+    # Основные пакеты Spring Cloud Gateway
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web.reactive: DEBUG
+
+    # Netty (если нужно логировать низкоуровневые HTTP-запросы/ответы)
+    reactor.netty.http.client: DEBUG
+    reactor.netty.http.server: DEBUG
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+
+spring:
+  cloud:
+    gateway:
+      discovery.locator.enabled: true
+      routes:
+        - id: main-service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/admin/**
+
+
+        - id: main-service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/users/**
+
+
+        - id: main-service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/compilations/**
+
+
+
+        - id: main-service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/categories/**
+
+
+
+        - id: main-service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/events/**

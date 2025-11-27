@@ -15,7 +15,6 @@ import java.util.List;
 
 @Component
 public class StatsClient {
-    private final RestClient restClient;
     private final DiscoveryClient discoveryClient;
     private final RetryTemplate retryTemplate;
     private final String statsServiceId;
@@ -36,8 +35,6 @@ public class StatsClient {
         retryPolicy.setMaxAttempts(5);
         retryTemplate.setRetryPolicy(retryPolicy);
 
-        this.restClient = RestClient.builder().baseUrl(makeUri()).build();
-
     }
 
     /**
@@ -46,6 +43,7 @@ public class StatsClient {
      * @param hit Входящий EndpointHitDto
      */
     public void saveHit(EndpointHitDto hit) {
+        RestClient restClient = RestClient.builder().baseUrl(makeUri()).build();
         restClient.post()
                 .uri("/hit")
                 .body(hit)
@@ -63,6 +61,7 @@ public class StatsClient {
      * @return List<ViewStatsDto> Список посещений
      */
     public List<ViewStatsDto> getStats(String start, String end, List<String> uris, Boolean unique) {
+        RestClient restClient = RestClient.builder().baseUrl(makeUri()).build();
         ViewStatsDto[] statsArray = restClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/stats")
@@ -92,6 +91,4 @@ public class StatsClient {
                     "Ошибка обнаружения адреса сервиса статистики с id: " + statsServiceId);
         }
     }
-
-
 }

@@ -26,4 +26,11 @@ eureka:
     preferIpAddress: true
     hostname: localhost
     instance-id: "${spring.application.name}:${random.value}"
+#    instance-id: "${spring.application.name}:${spring.application.instance_id:${random.value}}"
+# Первая строка назначает для server.port значение переменной PORT (если она существует),
+# если нет, то 0. Это заставляет Spring Boot назначить случайный, неиспользуемый порт.
+# Вторая строка добавляет текущий spring.application.instance_id (если он существует)
+# к spring.application.name, разделённому двоеточием (: ). Если spring.application.instance_id не существует,
+# то добавляется случайное значение для создания уникального идентификатора экземпляра Eureka
+# для этого экземпляра.
     leaseRenewalIntervalInSeconds: 10

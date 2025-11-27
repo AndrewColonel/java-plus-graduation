@@ -17,10 +17,10 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:6541/stats
+    url: jdbc:postgresql://localhost:5432/ewm_stats_db
     driver-class-name: org.postgresql.Driver
-    username: stats
-    password: stats
+    username: postgres
+    password: password
 
   sql:
     init:

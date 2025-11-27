@@ -17,10 +17,10 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/ewm
+    url: jdbc:postgresql://localhost:5432/ewm_main_db
     driver-class-name: org.postgresql.Driver
-    username: ewm
-    password: ewm
+    username: postgres
+    password: password
 
   sql:
     init:

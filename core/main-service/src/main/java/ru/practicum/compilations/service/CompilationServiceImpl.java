@@ -13,7 +13,7 @@ import ru.practicum.compilations.dto.CompilationDto;
 import ru.practicum.compilations.dto.PublicCompilationRequestParamsDto;
 import ru.practicum.event.EventRepository;
 import ru.practicum.event.model.Event;
-import ru.practicum.exception.EntityNotExistsException;
+import ru.practicum.server.exception.EntityNotExistsException;
 
 import java.util.HashSet;
 import java.util.List;

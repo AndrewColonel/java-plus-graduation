@@ -1,4 +1,4 @@
-package ru.practicum.exception;
+package ru.practicum.server.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;

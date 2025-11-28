@@ -1,35 +1,36 @@
-server:
-  port: 8080
-
-logging:
-  level:
-    ru.practicum: info
-    org:
-      springframework:
-        orm:
-          jpa: INFO
-          jpa.JpaTransactionManager: DEBUG
-        transaction: INFO
-        transaction.interceptor: TRACE
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/ewm
-    driver-class-name: org.postgresql.Driver
-    username: ewm
-    password: ewm
+  application:
+    name: main-service
+  config:
+#    import: configserver:http://localhost:8888
+    import: "configserver:"
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 6000
+      discovery:
+        enabled: true
+        serviceId: config-server
 
-  sql:
-    init:
-      mode: always
-  jpa:
-#    show-sql: true
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-#        format_sql: true
-#        time_zone: UTC
-#        default_schema: public
-
-stats-server:
-  url: http://localhost:9090
+eureka:
+  client:
+    enable: true
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://${eureka.instance.hostname:localhost}:${eureka.instance.port:8761}/eureka/
+  instance:
+    preferIpAddress: true
+    hostname: localhost
+    instance-id: "${spring.application.name}:${random.value}"
+#    instance-id: "${spring.application.name}:${spring.application.instance_id:${random.value}}"
+# Первая строка назначает для server.port значение переменной PORT (если она существует),
+# если нет, то 0. Это заставляет Spring Boot назначить случайный, неиспользуемый порт.
+# Вторая строка добавляет текущий spring.application.instance_id (если он существует)
+# к spring.application.name, разделённому двоеточием (: ). Если spring.application.instance_id не существует,
+# то добавляется случайное значение для создания уникального идентификатора экземпляра Eureka
+# для этого экземпляра.
+    leaseRenewalIntervalInSeconds: 10

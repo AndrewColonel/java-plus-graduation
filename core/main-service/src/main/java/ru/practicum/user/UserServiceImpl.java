@@ -3,7 +3,7 @@ package ru.practicum.user;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.server.exception.NotFoundException;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.dto.GetUserRequest;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;

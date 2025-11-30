@@ -1,4 +1,4 @@
-package ru.practicum.server.common;
+package ru.practicum.common;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;

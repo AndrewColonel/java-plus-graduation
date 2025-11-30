@@ -38,32 +38,32 @@ public class Request {
     }
 
     public boolean isPending() {
-        return status == Request.RequestStatus.PENDING;
+        return status == RequestStatus.PENDING;
     }
 
     public boolean isConfirmed() {
-        return status == Request.RequestStatus.CONFIRMED;
+        return status == RequestStatus.CONFIRMED;
     }
 
     public void confirm() {
         if (!isPending()) {
             throw new IllegalStateException("Невозможно полдтвердить заявку, которая уже не в состоянии PENDING");
         }
-        status = Request.RequestStatus.CONFIRMED;
+        status = RequestStatus.CONFIRMED;
     }
 
     public void reject() {
         if (!isPending()) {
             throw new IllegalStateException("Невозможно отменить заявку, которая уже не в состоянии PENDING");
         }
-        status = Request.RequestStatus.REJECTED;
+        status = RequestStatus.REJECTED;
     }
 
     public void cancel() {
         if (!isPending()) {
             throw new IllegalStateException("Невозможно отменить заявку, которая уже не в состоянии PENDING");
         }
-        status = Request.RequestStatus.CANCELED;
+        status = RequestStatus.CANCELED;
     }
 
 }

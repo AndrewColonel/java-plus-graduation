@@ -1,4 +1,4 @@
-package ru.practicum.server.exception;
+package ru.practicum.exception;
 
 public class EntityNotExistsException extends RuntimeException {
     public EntityNotExistsException(String message) {

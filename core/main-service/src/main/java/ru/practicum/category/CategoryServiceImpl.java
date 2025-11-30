@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.dto.UpdateCategoryDto;
-import ru.practicum.server.exception.NotFoundException;
+import ru.practicum.exception.NotFoundException;
 
 import java.util.Collection;
 

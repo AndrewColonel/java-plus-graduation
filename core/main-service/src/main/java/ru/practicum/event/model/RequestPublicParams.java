@@ -21,8 +21,11 @@ public class RequestPublicParams {
     private LocalDateTime rangeStart;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime rangeEnd;
+    @Builder.Default
     private Boolean onlyAvailable = false;
     private EventSort eventSort;
+    @Builder.Default
     private Integer from = 0;
+    @Builder.Default
     private Integer size = 10;
 }

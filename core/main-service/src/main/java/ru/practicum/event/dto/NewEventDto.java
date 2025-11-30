@@ -31,12 +31,12 @@ public class NewEventDto {
 
     @NotNull
     private Location location;
-
+    @Builder.Default
     private Boolean paid = false;
 
     @Min(0)
     private Integer participantLimit;
-
+    @Builder.Default
     private Boolean requestModeration = true;
 
     @NotBlank

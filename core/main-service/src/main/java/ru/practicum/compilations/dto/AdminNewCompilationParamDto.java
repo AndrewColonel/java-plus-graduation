@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class AdminNewCompilationParamDto {
     private List<Long> events;
-
+    @Builder.Default
     private Boolean pinned = false;
 
     @NotBlank(message = "Название подборки не может быть пустым")

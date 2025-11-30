@@ -21,6 +21,8 @@ public class RequestAdminParams {
     private LocalDateTime rangeStart;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime rangeEnd;
+    @Builder.Default
     private Integer from = 0;
+    @Builder.Default
     private Integer size = 10;
 }

@@ -6,7 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.State;
-import ru.practicum.user.User;
+import ru.practicum.user.model.entity.User;
+
 
 import java.util.List;
 import java.util.Optional;

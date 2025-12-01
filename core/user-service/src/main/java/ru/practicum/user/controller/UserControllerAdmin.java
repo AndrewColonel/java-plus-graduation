@@ -9,10 +9,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.exception.ValidationException;
+import ru.practicum.logging.Loggable;
 import ru.practicum.user.service.UserService;
 import ru.practicum.user.dto.GetUserRequest;
 import ru.practicum.user.dto.NewUserRequest;
-import ru.practicum.user.dto.UserDto;
+import ru.practicum.dto.user.UserDto;
 import ru.practicum.user.model.ActiveUser;
 
 import java.util.Collection;
@@ -23,11 +24,12 @@ import java.util.List;
 @Validated
 @RequestMapping("/admin/users")
 @Slf4j
-public class UserControllerAdmin {
+public class UserControllerAdmin implements UserControllerOperations {
 
     private final UserService userService;
 
     @GetMapping
+    @Override
     public Collection<UserDto> getAll(
             @RequestParam(name = "ids", required = false) List<Long> ids,
             @PositiveOrZero @RequestParam(name = "from", required = false, defaultValue = "0") Integer from,
@@ -41,6 +43,7 @@ public class UserControllerAdmin {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Override
     public UserDto create(@Valid @RequestBody NewUserRequest newUserRequest) {
         log.warn(">>> UserControllerAdmin: POST /admin/users");
         log.warn(">>> Запрос на создание пользователя {}", newUserRequest);
@@ -51,6 +54,7 @@ public class UserControllerAdmin {
 
     @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Override
     public void delete(@Positive @PathVariable("userId") Long userId) {
         log.warn(">>> UserControllerAdmin: DELETE /admin/users/{}", userId);
         log.warn(">>> Запрос на удаление пользователя с ID = {}", userId);
@@ -59,6 +63,7 @@ public class UserControllerAdmin {
     }
 
     @PatchMapping("/{userId}")
+    @Override
     public void activate(@Positive @PathVariable("userId") Long userId,
                          @RequestParam(name = "activated", required = false) String approveStateString) {
         ActiveUser approved = ActiveUser.from(approveStateString).orElseThrow(
@@ -68,4 +73,10 @@ public class UserControllerAdmin {
         userService.activateUser(userId, approved);
     }
 
+    @Loggable
+    @GetMapping("/{userId}")
+    @Override
+    public UserDto findById(@Positive @PathVariable("userId") Long userId) {
+        return userService.findUserById(userId);
+    }
 }

@@ -4,7 +4,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.comment.dto.CommentDto;
 import ru.practicum.comment.dto.NewCommentDto;
-import ru.practicum.user.UserMapper;
+import ru.practicum.user.model.UserMapper;
+
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommentMapper {

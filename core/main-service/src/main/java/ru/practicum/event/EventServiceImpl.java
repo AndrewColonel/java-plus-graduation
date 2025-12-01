@@ -25,8 +25,9 @@ import ru.practicum.requests.dto.EventRequestStatusUpdateResult;
 import ru.practicum.requests.dto.RequestDto;
 import ru.practicum.requests.model.Request;
 import ru.practicum.requests.model.RequestMapper;
-import ru.practicum.user.User;
-import ru.practicum.user.UserService;
+import ru.practicum.user.model.entity.User;
+import ru.practicum.user.service.UserService;
+
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

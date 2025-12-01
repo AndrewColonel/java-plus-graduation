@@ -5,7 +5,8 @@ import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.model.Event;
-import ru.practicum.user.UserMapper;
+import ru.practicum.user.model.UserMapper;
+
 
 public class EventMapper {
     public static EventShortDto toEventShortDto(Event event) {

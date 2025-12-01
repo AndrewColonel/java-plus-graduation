@@ -7,7 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.category.Category;
-import ru.practicum.user.User;
+import ru.practicum.user.model.entity.User;
+
 
 import java.time.LocalDateTime;
 

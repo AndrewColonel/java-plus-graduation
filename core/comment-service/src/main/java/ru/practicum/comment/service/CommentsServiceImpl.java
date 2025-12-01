@@ -13,14 +13,13 @@ import ru.practicum.event.EventRepository;
 import ru.practicum.event.model.Event;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
-import ru.practicum.user.User;
-import ru.practicum.user.UserRepository;
+import ru.practicum.user.client.UserClient;
+import ru.practicum.user.model.entity.User;
 
 import java.util.List;
 
 import static ru.practicum.comment.model.CommentMapper.toComment;
 import static ru.practicum.comment.model.CommentMapper.toDto;
-
 
 @Service
 @AllArgsConstructor
@@ -28,7 +27,7 @@ public class CommentsServiceImpl implements CommentsService {
 
     private final CommentsRepository commentsRepository;
     private final EventRepository eventRepository;
-    private final UserRepository userRepository;
+    private final UserClient userClient;
 
     // Public
     @Override
@@ -107,9 +106,7 @@ public class CommentsServiceImpl implements CommentsService {
     }
 
     private User getUser(Long commentatorId) {
-        return userRepository.findById(commentatorId).orElseThrow(
-                () -> new NotFoundException(String.format("Комментатор с ID %s не найден",
-                        commentatorId)));
+        return userClient.findById(commentatorId);
     }
 
     private Comment getComment(Long commentId) {

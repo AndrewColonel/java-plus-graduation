@@ -13,8 +13,9 @@ import ru.practicum.requests.RequestRepository;
 import ru.practicum.requests.dto.RequestDto;
 import ru.practicum.requests.model.Request;
 import ru.practicum.requests.model.RequestMapper;
-import ru.practicum.user.User;
-import ru.practicum.user.UserRepository;
+import ru.practicum.user.model.entity.User;
+import ru.practicum.user.repository.UserRepository;
+
 
 import java.time.LocalDateTime;
 import java.util.List;

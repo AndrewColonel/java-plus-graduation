@@ -3,7 +3,8 @@ package ru.practicum.requests.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import ru.practicum.event.model.Event;
-import ru.practicum.user.User;
+import ru.practicum.user.model.entity.User;
+
 
 import java.time.LocalDateTime;
 

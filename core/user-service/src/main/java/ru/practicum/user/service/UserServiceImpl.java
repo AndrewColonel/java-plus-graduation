@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.dto.GetUserRequest;
 import ru.practicum.user.dto.NewUserRequest;
-import ru.practicum.user.dto.UserDto;
+import ru.practicum.dto.user.UserDto;
 import ru.practicum.user.model.ActiveUser;
 import ru.practicum.user.model.entity.User;
 import ru.practicum.user.model.UserMapper;
@@ -56,6 +56,12 @@ public class UserServiceImpl implements UserService {
         user.setActivated(approved == ActiveUser.TRUE);
         userRepository.save(user);
     }
+
+    @Override
+    public UserDto findUserById(Long userId) {
+        return toUserDto(getUser(userId));
+    }
+
 
     // вспомогательный метод
     public User getUser(Long userId) {

@@ -3,7 +3,7 @@ package ru.practicum.comment.repository;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import ru.practicum.comment.dto.SearchCommentParam;
-import ru.practicum.comment.model.Comment;
+import ru.practicum.comment.model.entity.Comment;
 import ru.practicum.comment.model.CommentStatus;
 
 public class CommentSpecification {

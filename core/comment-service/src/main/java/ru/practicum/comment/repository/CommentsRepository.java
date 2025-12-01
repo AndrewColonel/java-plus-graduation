@@ -3,7 +3,7 @@ package ru.practicum.comment.repository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import ru.practicum.comment.model.Comment;
+import ru.practicum.comment.model.entity.Comment;
 import ru.practicum.comment.model.CommentStatus;
 
 import java.util.List;

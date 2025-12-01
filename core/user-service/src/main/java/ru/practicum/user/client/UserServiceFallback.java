@@ -10,7 +10,8 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class UserServiceFallback implements UserClient{
+public class UserServiceFallback implements UserClient {
+
     @Override
     public Collection<UserDto> getAll(List<Long> ids, Integer from, Integer size) {
         log.warn("Fallback UserClient response: сервис getAll временно недоступен");

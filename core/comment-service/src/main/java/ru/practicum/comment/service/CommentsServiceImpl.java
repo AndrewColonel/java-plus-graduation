@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.comment.repository.CommentSpecification;
 import ru.practicum.comment.repository.CommentsRepository;
 import ru.practicum.comment.dto.*;
-import ru.practicum.comment.model.Comment;
+import ru.practicum.comment.model.entity.Comment;
 import ru.practicum.comment.model.CommentStatus;
 import ru.practicum.comment.model.CommentMapper;
 import ru.practicum.event.EventRepository;

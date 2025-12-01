@@ -18,8 +18,10 @@ public class GetCommentsParam {
     @Positive
     private Long eventId;
     @PositiveOrZero
+    @Builder.Default
     private Integer from = 0;
     @Positive
+    @Builder.Default
     private Integer size = 10;
 
     public Pageable toPage() {

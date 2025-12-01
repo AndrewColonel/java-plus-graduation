@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class NewCompilationDto {
     private List<Long> events;
-
+    @Builder.Default
     private Boolean pinned = false;
 
     @NotBlank

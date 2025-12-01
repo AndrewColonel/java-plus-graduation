@@ -1,4 +1,4 @@
-package ru.practicum.user;
+package ru.practicum.user.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,11 +7,15 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.dto.GetUserRequest;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
+import ru.practicum.user.model.ActiveUser;
+import ru.practicum.user.model.entity.User;
+import ru.practicum.user.model.UserMapper;
+import ru.practicum.user.repository.UserRepository;
 
 import java.util.Collection;
 
-import static ru.practicum.user.UserMapper.toUser;
-import static ru.practicum.user.UserMapper.toUserDto;
+import static ru.practicum.user.model.UserMapper.toUser;
+import static ru.practicum.user.model.UserMapper.toUserDto;
 
 @Service
 @AllArgsConstructor

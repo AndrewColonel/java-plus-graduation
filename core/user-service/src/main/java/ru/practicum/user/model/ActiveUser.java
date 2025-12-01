@@ -1,4 +1,4 @@
-package ru.practicum.user;
+package ru.practicum.user.model;
 
 import java.util.Optional;
 

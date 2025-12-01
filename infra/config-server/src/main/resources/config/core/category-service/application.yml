@@ -1,0 +1,69 @@
+logging:
+  level:
+    ru.yandex.practicum.commerce.shopping.cart: TRACE
+    org:
+      springframework:
+        orm:
+          jpa: INFO
+          jpa.JpaTransactionManager: INFO
+        transaction: INFO
+        transaction.interceptor: INFO
+      springframework.cloud.netflix.eureka: INFO
+      springframework.web.client.RestTemplate: WARN
+      apache.kafka: INFO
+    feign.Logger: WARN
+
+server:
+  port: 0
+#  port: 12345
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ewm_category
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: password
+
+  sql:
+    init:
+      mode: always
+  jpa:
+#    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+#        format_sql: true
+#        time_zone: UTC
+#        default_schema: public
+
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+        alphanumeric-ids:
+          enabled: true
+
+resilience4j:
+  circuitbreaker:
+  configs:
+    default:
+      slidingWindowSize: 10
+      failureRateThreshold: 50
+  instances:
+    warehouse:
+      slidingWindowSize: 10
+      waitDurationInOpenState: 10000 # 10 секунд в миллисекундах
+      permittedNumberOfCallsInHalfOpenState: 5
+      slidingWindowType: COUNT_BASED
+      minimumNumberOfCalls: 10
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

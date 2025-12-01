@@ -8,6 +8,7 @@ import ru.practicum.event.service.EventService;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.model.RequestPublicParams;
+import ru.practicum.logging.Loggable;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class PublicEventController implements PublicEventControllerOperations {
 
     private final EventService eventService;
 
+    @Loggable
     @GetMapping
     @Override
     public List<EventShortDto> getEvents(
@@ -28,6 +30,7 @@ public class PublicEventController implements PublicEventControllerOperations {
         return eventService.getAllEvents(params, request);
     }
 
+    @Loggable
     @GetMapping("/{eventId}")
     @Override
     public EventFullDto getEventById(
@@ -38,6 +41,7 @@ public class PublicEventController implements PublicEventControllerOperations {
         return eventById;
     }
 
+    @Loggable
     @GetMapping("/{eventId}")
     @Override
     public EventFullDto getById(@PathVariable Long eventId) {

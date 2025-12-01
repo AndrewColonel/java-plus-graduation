@@ -9,6 +9,7 @@ import ru.practicum.event.model.Location;
 import ru.practicum.event.model.State;
 import ru.practicum.user.dto.UserShortDto;
 
+
 import java.time.LocalDateTime;
 
 @Data

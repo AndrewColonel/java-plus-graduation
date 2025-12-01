@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.event.EventService;
+import ru.practicum.event.service.EventService;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.model.RequestAdminParams;
@@ -15,11 +15,12 @@ import java.util.List;
 @RequestMapping("/admin/events")
 @RequiredArgsConstructor
 @Slf4j
-public class AdminEventController {
+public class AdminEventController implements AdminEventControllerOperations {
 
     private final EventService eventService;
 
     @GetMapping
+    @Override
     public List<EventFullDto> getAllEvents(
             @ModelAttribute RequestAdminParams params
     ) {
@@ -32,6 +33,7 @@ public class AdminEventController {
 
 
     @PatchMapping("/{eventId}")
+    @Override
     public EventFullDto updateEvent(
             @PathVariable Long eventId,
             @RequestBody @Valid UpdateEventAdminRequest request

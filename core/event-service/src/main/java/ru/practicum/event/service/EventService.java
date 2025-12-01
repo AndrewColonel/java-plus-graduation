@@ -1,4 +1,4 @@
-package ru.practicum.event;
+package ru.practicum.event.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import ru.practicum.event.dto.*;
@@ -27,6 +27,8 @@ public interface EventService {
     List<EventShortDto> getAllEvents(RequestPublicParams params, HttpServletRequest request);
 
     EventFullDto getEventById(Long eventId, HttpServletRequest request);
+
+    EventFullDto getById(Long eventId);
 
     List<RequestDto> getEventParticipants(Long userId, Long eventId);
 

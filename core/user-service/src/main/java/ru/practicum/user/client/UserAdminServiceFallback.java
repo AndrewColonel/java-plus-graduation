@@ -10,7 +10,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class UserServiceFallback implements UserClient {
+public class UserAdminServiceFallback implements UserAdminClient {
 
     @Override
     public Collection<UserDto> getAll(List<Long> ids, Integer from, Integer size) {
@@ -35,7 +35,7 @@ public class UserServiceFallback implements UserClient {
     }
 
     @Override
-    public UserDto findById(Long userId) {
+    public UserDto getUserById(Long userId) {
         log.warn("Fallback UserClient response: сервис findById временно недоступен");
         return null;
     }

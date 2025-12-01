@@ -1,4 +1,4 @@
-package ru.practicum.event;
+package ru.practicum.event.service;
 
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,8 +14,11 @@ import ru.practicum.category.CategoryService;
 import ru.practicum.client.StatsClient;
 import ru.practicum.compilations.dto.EndpointHitDto;
 import ru.practicum.compilations.dto.ViewStatsDto;
+import ru.practicum.event.repository.EventRepository;
+import ru.practicum.event.repository.EventSpecification;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.model.*;
+import ru.practicum.event.model.entity.Event;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
@@ -36,6 +39,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static ru.practicum.event.model.EventMapper.toEventFullDto;
 
 @Service
 @AllArgsConstructor
@@ -130,7 +135,7 @@ public class EventServiceImpl implements EventService {
 
         Event updated = eventRepository.save(event);
         log.info("After update: Event id={}, state={}", updated.getId(), updated.getState());
-        return EventMapper.toEventFullDto(updated);
+        return toEventFullDto(updated);
     }
 
     @Override
@@ -169,7 +174,7 @@ public class EventServiceImpl implements EventService {
         event.setState(State.PENDING);
         event = eventRepository.save(event);
 
-        return EventMapper.toEventFullDto(event);
+        return toEventFullDto(event);
     }
 
     @Override
@@ -180,7 +185,7 @@ public class EventServiceImpl implements EventService {
             throw new ValidationException("User with id " + userId + " is not the initiator of event with id " + eventId);
         }
 
-        EventFullDto dto = EventMapper.toEventFullDto(event);
+        EventFullDto dto = toEventFullDto(event);
 
         setViewsAndConfirmedRequests(List.of(dto));
 
@@ -210,7 +215,7 @@ public class EventServiceImpl implements EventService {
         }
 
         Event updated = eventRepository.save(event);
-        return EventMapper.toEventFullDto(updated);
+        return toEventFullDto(updated);
     }
 
     @Override
@@ -230,9 +235,15 @@ public class EventServiceImpl implements EventService {
                 .map(ViewStatsDto::getHits)
                 .orElse(0L);
 
-        EventFullDto dto = EventMapper.toEventFullDto(event);
+        EventFullDto dto = toEventFullDto(event);
         dto.setViews(statsViews);
         return dto;
+    }
+
+    @Override
+    public EventFullDto getById(Long eventId) {
+        return toEventFullDto(eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found with id: " + eventId)));
     }
 
     @Override

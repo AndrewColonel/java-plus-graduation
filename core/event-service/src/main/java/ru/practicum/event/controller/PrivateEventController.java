@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.event.EventService;
+import ru.practicum.event.service.EventService;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
@@ -20,11 +20,12 @@ import java.util.List;
 @RequestMapping("/users/{userId}/events")
 @RequiredArgsConstructor
 @Slf4j
-public class PrivateEventController {
+public class PrivateEventController implements PrivateEventControllerOperations {
 
     private final EventService eventService;
 
     @GetMapping
+    @Override
     public List<EventShortDto> getAllEvents(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") Integer from,
@@ -40,6 +41,7 @@ public class PrivateEventController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Override
     public EventFullDto createEvent(
             @PathVariable Long userId,
             @RequestBody @Valid NewEventDto newEventDto
@@ -52,6 +54,7 @@ public class PrivateEventController {
     }
 
     @GetMapping("/{eventId}")
+    @Override
     public EventFullDto getEvent(
             @PathVariable Long userId,
             @PathVariable Long eventId
@@ -64,6 +67,7 @@ public class PrivateEventController {
     }
 
     @PatchMapping("/{eventId}")
+    @Override
     public EventFullDto updateEvent(
             @PathVariable Long userId,
             @PathVariable Long eventId,
@@ -77,12 +81,14 @@ public class PrivateEventController {
     }
 
     @GetMapping("/{eventId}/requests")
+    @Override
     public List<RequestDto> getUsersEventRequests(@PathVariable Long userId,
                                                   @PathVariable Long eventId) {
         return eventService.getEventParticipants(userId, eventId);
     }
 
     @PatchMapping("/{eventId}/requests")
+    @Override
     public EventRequestStatusUpdateResult changeRequestStatus(@PathVariable Long userId,
                                                               @PathVariable Long eventId,
                                                               @RequestBody @Valid EventRequestStatusUpdateRequest request) {

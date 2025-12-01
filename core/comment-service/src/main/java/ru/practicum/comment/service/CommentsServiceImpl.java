@@ -9,12 +9,14 @@ import ru.practicum.comment.dto.*;
 import ru.practicum.comment.model.entity.Comment;
 import ru.practicum.comment.model.CommentStatus;
 import ru.practicum.comment.model.CommentMapper;
-import ru.practicum.event.EventRepository;
-import ru.practicum.event.model.Event;
+
+import ru.practicum.event.client.EventPublicClient;
+
+import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
-import ru.practicum.user.client.UserClient;
-import ru.practicum.user.model.entity.User;
+import ru.practicum.user.client.UserAdminClient;
+import ru.practicum.user.dto.UserDto;
 
 import java.util.List;
 
@@ -26,13 +28,13 @@ import static ru.practicum.comment.model.CommentMapper.toDto;
 public class CommentsServiceImpl implements CommentsService {
 
     private final CommentsRepository commentsRepository;
-    private final EventRepository eventRepository;
-    private final UserClient userClient;
+    private final EventPublicClient eventPublicClient;
+    private final UserAdminClient userClient;
 
     // Public
     @Override
     public List<CommentDto> getCommentPublic(GetCommentsParam param) {
-        Event event = getEvent(param.getEventId());
+        EventFullDto event = getEvent(param.getEventId());
         // для публичного показа допускаются комментарии после модерации администртором
         return commentsRepository.findByEventIdAndStatusOrderByCreateTimeDesc(event.getId(),
                         CommentStatus.MODERATED_OPEN, param.toPage())
@@ -44,11 +46,11 @@ public class CommentsServiceImpl implements CommentsService {
     // Private
     @Override
     public CommentDto createCommentPrivate(NewCommentDto newCommentDto, CreateCommentParam param) {
-        Event event = getEvent(param.getEventId());
-        User creator = getUser(param.getUserId());
+        EventFullDto event = getEvent(param.getEventId());
+        UserDto creator = getUser(param.getUserId());
         Comment comment = toComment(newCommentDto);
-        comment.setCreator(creator);
-        comment.setEvent(event);
+        comment.setCreator(creator.getId());
+        comment.setEvent(event.getId());
         comment.setStatus(CommentStatus.OPEN);
         return toDto(commentsRepository.save(comment));
     }
@@ -99,14 +101,12 @@ public class CommentsServiceImpl implements CommentsService {
     }
 
     // вспомогательные методы
-    private Event getEvent(Long eventId) {
-        return eventRepository.findById(eventId).orElseThrow(
-                () -> new NotFoundException(String.format("Событие с ID %s не найдено",
-                        eventId)));
+    private EventFullDto getEvent(Long eventId) {
+        return eventPublicClient.getById(eventId);
     }
 
-    private User getUser(Long commentatorId) {
-        return userClient.findById(commentatorId);
+    private UserDto getUser(Long commentatorId) {
+        return userClient.getUserById(commentatorId);
     }
 
     private Comment getComment(Long commentId) {
@@ -117,9 +117,9 @@ public class CommentsServiceImpl implements CommentsService {
 
     // метод проверяет доступность комментария для изменения
     private Comment checkCommentAvailability(UpdateCommentParam param) {
-        Event event = getEvent(param.getEventId());
+        EventFullDto event = getEvent(param.getEventId());
         Comment comment = getComment(param.getCommentId());
-        if (!comment.getEvent().getId().equals(event.getId())) {
+        if (!comment.getEvent().equals(event.getId())) {
             throw new ValidationException(String.format("Комментарий с id %s не относится к событию с id %s",
                     comment.getId(), event.getId()));
         }
@@ -130,13 +130,13 @@ public class CommentsServiceImpl implements CommentsService {
                     String.format("Изменить данный коммментарий после модерации нельзя status = %s",
                             comment.getStatus()));
         }
-        User commentator = getUser(param.getUserId());
+        UserDto commentator = getUser(param.getUserId());
         // Можно менять только свой комментарий
-        if (!comment.getCreator().getId().equals(commentator.getId())) {
+        if (!comment.getCreator().equals(commentator.getId())) {
             throw new ValidationException(
                     String.format("Можно менять только свои комментарии, " +
                                     "id польтзователя %s не равен id комментатора %s",
-                            comment.getCreator().getId(), commentator.getId()));
+                            comment.getCreator(), commentator.getId()));
         }
         return comment;
     }

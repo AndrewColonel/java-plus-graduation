@@ -1,8 +1,8 @@
-package ru.practicum.event;
+package ru.practicum.event.repository;
 
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
-import ru.practicum.event.model.Event;
+import ru.practicum.event.model.entity.Event;
 import ru.practicum.event.model.RequestAdminParams;
 import ru.practicum.event.model.RequestPublicParams;
 import ru.practicum.event.model.State;

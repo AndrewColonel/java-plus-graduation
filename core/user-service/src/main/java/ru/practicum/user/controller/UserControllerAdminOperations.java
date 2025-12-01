@@ -11,7 +11,7 @@ import ru.practicum.user.dto.UserDto;
 import java.util.Collection;
 import java.util.List;
 
-public interface UserControllerOperations {
+public interface UserControllerAdminOperations {
     @GetMapping
     Collection<UserDto> getAll(
             @RequestParam(name = "ids", required = false) List<Long> ids,
@@ -32,6 +32,6 @@ public interface UserControllerOperations {
 
 
     @GetMapping("/{userId}")
-    UserDto findById(@Positive @PathVariable("userId") Long userId);
+    UserDto getUserById(@Positive @PathVariable("userId") Long userId);
 
 }

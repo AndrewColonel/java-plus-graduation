@@ -1,10 +1,10 @@
-package ru.practicum.event;
+package ru.practicum.event.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import ru.practicum.event.model.Event;
+import ru.practicum.event.model.entity.Event;
 import ru.practicum.event.model.State;
 import ru.practicum.user.model.entity.User;
 

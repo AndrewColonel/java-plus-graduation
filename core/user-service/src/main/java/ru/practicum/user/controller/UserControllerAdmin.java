@@ -24,7 +24,7 @@ import java.util.List;
 @Validated
 @RequestMapping("/admin/users")
 @Slf4j
-public class UserControllerAdmin implements UserControllerOperations {
+public class UserControllerAdmin implements UserControllerAdminOperations {
 
     private final UserService userService;
 
@@ -76,7 +76,7 @@ public class UserControllerAdmin implements UserControllerOperations {
     @Loggable
     @GetMapping("/{userId}")
     @Override
-    public UserDto findById(@Positive @PathVariable("userId") Long userId) {
+    public UserDto getUserById(@Positive @PathVariable("userId") Long userId) {
         return userService.findUserById(userId);
     }
 }

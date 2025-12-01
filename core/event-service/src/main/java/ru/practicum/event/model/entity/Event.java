@@ -1,4 +1,4 @@
-package ru.practicum.event.model;
+package ru.practicum.event.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.category.Category;
+import ru.practicum.event.model.Location;
+import ru.practicum.event.model.State;
 import ru.practicum.user.model.entity.User;
 
 

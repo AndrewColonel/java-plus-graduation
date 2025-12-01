@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.comment.model.CommentStatus;
-import ru.practicum.event.model.Event;
 import ru.practicum.user.model.entity.User;
 
 
@@ -26,13 +25,11 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "event_id", nullable = false)
-    private Event event;
+    @Column(name = "event_id", nullable = false)
+    private Long event;
 
-    @ManyToOne
-    @JoinColumn(name = "creator_id", nullable = false)
-    private User creator;
+    @Column(name = "creator_id", nullable = false)
+    private Long creator;
 
     @Column(name = "text", nullable = false)
     private String text;

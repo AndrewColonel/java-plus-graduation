@@ -2,7 +2,7 @@ package ru.practicum.user.service;
 
 import ru.practicum.user.dto.GetUserRequest;
 import ru.practicum.user.dto.NewUserRequest;
-import ru.practicum.dto.user.UserDto;
+import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.model.ActiveUser;
 import ru.practicum.user.model.entity.User;
 

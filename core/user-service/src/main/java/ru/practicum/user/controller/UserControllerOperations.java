@@ -6,7 +6,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.user.dto.NewUserRequest;
-import ru.practicum.dto.user.UserDto;
+import ru.practicum.user.dto.UserDto;
 
 import java.util.Collection;
 import java.util.List;

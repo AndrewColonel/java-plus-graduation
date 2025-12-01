@@ -13,7 +13,7 @@ import ru.practicum.logging.Loggable;
 import ru.practicum.user.service.UserService;
 import ru.practicum.user.dto.GetUserRequest;
 import ru.practicum.user.dto.NewUserRequest;
-import ru.practicum.dto.user.UserDto;
+import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.model.ActiveUser;
 
 import java.util.Collection;

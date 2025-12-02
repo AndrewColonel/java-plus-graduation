@@ -6,11 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import ru.practicum.category.Category;
 import ru.practicum.event.model.Location;
 import ru.practicum.event.model.State;
-import ru.practicum.user.model.entity.User;
-
 
 import java.time.LocalDateTime;
 
@@ -27,9 +24,8 @@ public class Event {
 
     private String annotation;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @Column(name = "category_id")
+    private Long category;
 
     @CreationTimestamp
     private LocalDateTime createdOn;
@@ -38,9 +34,8 @@ public class Event {
 
     private LocalDateTime eventDate;
 
-    @ManyToOne
-    @JoinColumn(name = "initiator_id")
-    private User initiator;
+    @Column(name = "initiator_id")
+    private Long initiator;
 
     @Embedded
     private Location location;

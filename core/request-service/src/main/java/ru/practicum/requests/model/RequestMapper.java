@@ -12,8 +12,8 @@ public class RequestMapper {
         return RequestDto.builder()
                 .id(request.getId())
                 .created(request.getCreated())
-                .event(request.getEvent().getId())
-                .requester(request.getRequester().getId())
+                .event(request.getEvent())
+                .requester(request.getRequester())
                 .status(request.getStatus().toString())
                 .build();
     }
@@ -23,5 +23,22 @@ public class RequestMapper {
                 .map(RequestMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public static Request toEntity(RequestDto requestDto) {
+        return Request.builder()
+                .id(requestDto.getId())
+                .created(requestDto.getCreated())
+                .event(requestDto.getEvent())
+                .requester(requestDto.getRequester())
+                .status(Request.RequestStatus.valueOf(requestDto.getStatus()))
+                .build();
+    }
+
+    public static List<Request> toEntity(List<RequestDto> requestDtoList) {
+        return requestDtoList.stream()
+                .map(RequestMapper::toEntity)
+                .toList();
+    }
+
 
 }

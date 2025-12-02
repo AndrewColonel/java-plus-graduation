@@ -1,31 +1,33 @@
 package ru.practicum.requests.model.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import ru.practicum.event.model.Event;
-import ru.practicum.user.model.entity.User;
-
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "participation_requests")
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id", nullable = false)
-    private Event event;
+    @Column(name = "event_id", nullable = false)
+    private Long event;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requester_id", nullable = false)
-    private User requester;
+    @Column(name = "requester_id", nullable = false)
+    private Long requester;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private RequestStatus status = RequestStatus.PENDING;
 
     private LocalDateTime created;
@@ -35,7 +37,7 @@ public class Request {
     }
 
     public Long getEventId() {
-        return event.getId();
+        return event;
     }
 
     public boolean isPending() {

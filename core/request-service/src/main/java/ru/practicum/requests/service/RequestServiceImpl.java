@@ -3,8 +3,10 @@ package ru.practicum.requests.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.event.EventRepository;
-import ru.practicum.event.model.Event;
+
+
+import ru.practicum.event.client.EventPublicClient;
+import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.model.State;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.EntityNotExistsException;
@@ -13,12 +15,14 @@ import ru.practicum.requests.repository.RequestRepository;
 import ru.practicum.requests.dto.RequestDto;
 import ru.practicum.requests.model.entity.Request;
 import ru.practicum.requests.model.RequestMapper;
-import ru.practicum.user.model.entity.User;
-import ru.practicum.user.repository.UserRepository;
+import ru.practicum.user.client.UserAdminClient;
+import ru.practicum.user.dto.UserDto;
 
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static ru.practicum.requests.model.RequestMapper.toEntity;
 
 
 @Service
@@ -26,9 +30,9 @@ import java.util.List;
 @Slf4j
 public class RequestServiceImpl implements RequestService {
 
-    private final UserRepository userRepository;
+    private final UserAdminClient userAdminClient;
     private final RequestRepository requestRepository;
-    private final EventRepository eventRepository;
+    private final EventPublicClient eventPublicClient;
 
     /**
      * Получение информации о заявках текущего пользователя на участие в чужих событиях
@@ -44,6 +48,7 @@ public class RequestServiceImpl implements RequestService {
         List<RequestDto> dtoList = RequestMapper.toDto(requestRepository.findAllByRequesterId(userId));
         return dtoList;
     }
+
 
     /**
      * Добавление запроса от текущего пользователя на участие в событии
@@ -65,9 +70,9 @@ public class RequestServiceImpl implements RequestService {
     public RequestDto addParticipationRequest(Long userId, Long eventId) {
         log.warn("addParticipationRequest(Long {}, Long {})", userId, eventId);
         // Проверить существование пользователя.
-        User existedUser = validateUserExists(userId);
+        UserDto existedUser = validateUserExists(userId);
         // Проверить существование события.
-        Event existedEvent = validateEventExists(eventId);
+        EventFullDto existedEvent = validateEventExists(eventId);
 
         // Проверить, что событие опубликовано (PUBLISHED).
         if (!existedEvent.getState().equals(State.PUBLISHED)) {
@@ -92,8 +97,8 @@ public class RequestServiceImpl implements RequestService {
         }
 
         Request newRequest = new Request();
-        newRequest.setRequester(existedUser);
-        newRequest.setEvent(existedEvent);
+        newRequest.setRequester(existedUser.getId());
+        newRequest.setEvent(existedEvent.getId());
         newRequest.setCreated(LocalDateTime.now());
 
 
@@ -129,7 +134,7 @@ public class RequestServiceImpl implements RequestService {
         Request existedRequest = validateRequestExists(requestId);
 
         // Проверить, что запрос принадлежит пользователю
-        if (!existedRequest.getRequester().getId().equals(userId)) {
+        if (!existedRequest.getRequester().equals(userId)) {
             throw new NotFoundException("Запрос не принадлежит пользователю.");
         }
 
@@ -138,6 +143,41 @@ public class RequestServiceImpl implements RequestService {
 
         RequestDto dto = RequestMapper.toDto(existedRequest);
         return dto;
+    }
+
+    @Override
+    public List<RequestDto> getEventRequests(Long eventId) {
+        log.warn("getEventRequests(Long {})", eventId);
+        // Проверить пользователя
+        validateEventExists(eventId);
+        List<RequestDto> dtoList = RequestMapper.toDto(requestRepository.findAllByEventId(eventId));
+        return dtoList;
+    }
+
+    @Override
+    public List<RequestDto> findAllRequests(List<Long> requestIds) {
+        return requestRepository.findAllByIdIn(requestIds).stream()
+                .map(RequestMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public Long countRequest(Long eventId, Request.RequestStatus status) {
+        return requestRepository.countByEventIdAndStatus(eventId,status);
+    }
+
+    @Override
+    public List<RequestDto> saveAllRequests(List<RequestDto> requestDtoList) {
+        return requestRepository.saveAll(toEntity(requestDtoList)).stream()
+                .map(RequestMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<RequestDto> findRequestByStatus(List<Long> requestId,Request.RequestStatus status) {
+        return requestRepository.findByEventIdInAndStatus(requestId, status).stream()
+                .map(RequestMapper::toDto)
+                .toList();
     }
 
     /**
@@ -165,7 +205,7 @@ public class RequestServiceImpl implements RequestService {
      * @param eventId ID запроса
      * @return Если существует, возвращается Service
      */
-    private Event validateEventExists(Long eventId) {
+    private EventFullDto validateEventExists(Long eventId) {
         log.warn("validateEventExists(Long {})", eventId);
         // Проверка на null ID
         if (eventId == null) {
@@ -173,8 +213,7 @@ public class RequestServiceImpl implements RequestService {
         }
 
         // Проверка существования подборки
-        return eventRepository.findById(eventId)
-                .orElseThrow(() -> new EntityNotExistsException("Запрос с ID " + eventId + " не найден"));
+        return eventPublicClient.getById(eventId);
     }
 
     /**
@@ -183,7 +222,7 @@ public class RequestServiceImpl implements RequestService {
      * @param userId ID пользователя
      * @return Если существует, возвращается User
      */
-    private User validateUserExists(Long userId) {
+    private UserDto validateUserExists(Long userId) {
         log.warn("validateUserExists(Long {})", userId);
         // Проверка на null ID
         if (userId == null) {
@@ -191,8 +230,7 @@ public class RequestServiceImpl implements RequestService {
         }
 
         // Проверка существования подборки
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotExistsException("Пользователь с ID " + userId + " не найден"));
+        return userAdminClient.getUserById(userId);
     }
 
 }

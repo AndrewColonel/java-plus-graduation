@@ -32,7 +32,7 @@ public class EventPublicClientFallback implements EventPublicClient {
     }
 
     @Override
-    public Set<EventFullDto> getAllByIdIn(List<Long> eventIds) {
+    public Set<EventShortDto> getAllByIdIn(List<Long> eventIds) {
         log.warn("Fallback EventPublicClient response: сервис getAllByIdIn временно недоступен");
         return Set.of();
     }

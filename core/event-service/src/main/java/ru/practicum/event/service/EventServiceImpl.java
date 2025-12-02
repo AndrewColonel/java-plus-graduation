@@ -329,9 +329,9 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Set<EventFullDto> getEventByIdIn(List<Long> eventIds) {
+    public Set<EventShortDto> getEventByIdIn(List<Long> eventIds) {
         return eventRepository.findAllByIdIn(eventIds).stream()
-                .map(EventMapper::toEventFullDto)
+                .map(EventMapper::toEventShortDto)
                 .collect(Collectors.toSet());
     }
 

@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.comment.model.CommentStatus;
-import ru.practicum.user.model.entity.User;
+
 
 
 import java.time.LocalDateTime;

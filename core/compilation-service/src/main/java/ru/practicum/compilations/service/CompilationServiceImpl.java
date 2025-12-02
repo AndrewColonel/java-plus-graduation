@@ -13,14 +13,14 @@ import ru.practicum.compilations.dto.CompilationDto;
 import ru.practicum.compilations.dto.PublicCompilationRequestParamsDto;
 
 import ru.practicum.event.client.EventPublicClient;
-import ru.practicum.event.dto.EventFullDto;
 
+import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.exception.EntityNotExistsException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
 
 @Service
 @AllArgsConstructor
@@ -52,13 +52,13 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
 
-        Set<EventFullDto> events = new HashSet<>();
+        Set<EventShortDto> events = new HashSet<>();
         if (adminNewCompilationParamDto.getEvents() != null && !adminNewCompilationParamDto.getEvents().isEmpty()) {
             events = eventPublicClient.getAllByIdIn(adminNewCompilationParamDto.getEvents());
         }
-        Compilation compilation = CompilationMapper.toEntity(adminNewCompilationParamDto, events);
+        Compilation compilation = CompilationMapper.toEntity(adminNewCompilationParamDto);
         Compilation saved = compilationRepository.save(compilation);
-        return CompilationMapper.toDto(saved);
+        return CompilationMapper.toDto(saved, events);
     }
 
     /**
@@ -90,13 +90,14 @@ public class CompilationServiceImpl implements CompilationService {
         exitingCompilation.updateDetails(adminUpdateCompilationParamDto.getTitle(), adminUpdateCompilationParamDto.getPinned());
 
         // Обновляем список событий (если передан в запросе)
+        Set<EventShortDto> events = new HashSet<>();
         if (adminUpdateCompilationParamDto.getEvents() != null) {
-            Set<EventFullDto> events = eventPublicClient.getAllByIdIn(adminUpdateCompilationParamDto.getEvents());
-            exitingCompilation.replaceEvents(events.stream().map(EventFullDto::getId).collect(Collectors.toSet()));
+            events = eventPublicClient.getAllByIdIn(adminUpdateCompilationParamDto.getEvents());
+            exitingCompilation.replaceEvents(events.stream().map(EventShortDto::getId).collect(Collectors.toSet()));
         }
 
         compilationRepository.save(exitingCompilation);
-        return CompilationMapper.toDto(exitingCompilation);
+        return CompilationMapper.toDto(exitingCompilation, events);
 
     }
 
@@ -109,7 +110,8 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto getCompilationById(long complId) {
         Compilation compilation = validateCompilationExists(complId);
-        return CompilationMapper.toDto(compilation);
+        Set<EventShortDto> events = eventPublicClient.getAllByIdIn(new ArrayList<>(compilation.getEvents()));
+        return CompilationMapper.toDto(compilation, events);
     }
 
     /**
@@ -130,8 +132,19 @@ public class CompilationServiceImpl implements CompilationService {
             compilations = compilationRepository.findAll(pageRequest).getContent();
         }
 
+        Set<Long> eventIds = new HashSet<>();
+        for (Compilation compilation : compilations) {
+            // собираю множесто событий, задействованных в подборках
+            eventIds.addAll(compilation.getEvents());
+        }
+
+        Map<Long,EventShortDto> eventShortDtoMap =
+                eventPublicClient.getAllByIdIn(new ArrayList<>(eventIds)).stream()
+                        .collect(Collectors.toMap(EventShortDto::getId,
+                                Function.identity()));
+
         return compilations.stream()
-                .map(CompilationMapper::toDto)
+                .map(c -> CompilationMapper.toDto(c, eventShortDtoMap))
                 .collect(Collectors.toList());
     }
 

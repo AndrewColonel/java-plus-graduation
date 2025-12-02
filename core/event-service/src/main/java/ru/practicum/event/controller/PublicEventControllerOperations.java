@@ -29,5 +29,5 @@ public interface PublicEventControllerOperations {
     EventFullDto getById(@PathVariable Long eventId);
 
     @GetMapping
-    Set<EventFullDto> getAllByIdIn(@RequestBody List<Long> eventIds);
+    Set<EventShortDto> getAllByIdIn(@RequestBody List<Long> eventIds);
 }

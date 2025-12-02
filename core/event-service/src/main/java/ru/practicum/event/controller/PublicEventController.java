@@ -52,7 +52,7 @@ public class PublicEventController implements PublicEventControllerOperations {
     @Loggable
     @GetMapping
     @Override
-    public Set<EventFullDto> getAllByIdIn(@RequestBody List<Long> eventIds) {
+    public Set<EventShortDto> getAllByIdIn(@RequestBody List<Long> eventIds) {
         return eventService.getEventByIdIn(eventIds);
     }
 }

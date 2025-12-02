@@ -26,19 +26,13 @@ public class Compilation {
     @Column(nullable = false)
     private Boolean pinned;
 
-//    @ManyToMany
-//    @JoinTable(
-//            name = "compilation_events",
-//            joinColumns = @JoinColumn(name = "compilation_id"),
-//            inverseJoinColumns = @JoinColumn(name = "event_id")
-//    )
-
     @ElementCollection
     @CollectionTable(
             name = "compilation_events",
             joinColumns = @JoinColumn(name = "compilation_id")
     )
-     @Builder.Default
+    @Column(name = "event_id")
+    @Builder.Default
     private Set<Long> events = new HashSet<>();
 
 

@@ -11,8 +11,10 @@ import ru.practicum.compilations.dto.AdminNewCompilationParamDto;
 import ru.practicum.compilations.dto.AdminUpdateCompilationParamDto;
 import ru.practicum.compilations.dto.CompilationDto;
 import ru.practicum.compilations.dto.PublicCompilationRequestParamsDto;
-import ru.practicum.event.EventRepository;
-import ru.practicum.event.model.Event;
+
+import ru.practicum.event.client.EventPublicClient;
+import ru.practicum.event.dto.EventFullDto;
+
 import ru.practicum.exception.EntityNotExistsException;
 
 import java.util.HashSet;
@@ -26,7 +28,7 @@ import java.util.stream.Collectors;
 public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
-    private final EventRepository eventRepository;
+    private final EventPublicClient eventPublicClient;
 
 
     /**
@@ -50,9 +52,9 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
 
-        Set<Event> events = new HashSet<>();
+        Set<EventFullDto> events = new HashSet<>();
         if (adminNewCompilationParamDto.getEvents() != null && !adminNewCompilationParamDto.getEvents().isEmpty()) {
-            events = eventRepository.findAllByIdIn(adminNewCompilationParamDto.getEvents());
+            events = eventPublicClient.getAllByIdIn(adminNewCompilationParamDto.getEvents());
         }
         Compilation compilation = CompilationMapper.toEntity(adminNewCompilationParamDto, events);
         Compilation saved = compilationRepository.save(compilation);
@@ -89,8 +91,8 @@ public class CompilationServiceImpl implements CompilationService {
 
         // Обновляем список событий (если передан в запросе)
         if (adminUpdateCompilationParamDto.getEvents() != null) {
-            Set<Event> events = eventRepository.findAllByIdIn(adminUpdateCompilationParamDto.getEvents());
-            exitingCompilation.replaceEvents(events);
+            Set<EventFullDto> events = eventPublicClient.getAllByIdIn(adminUpdateCompilationParamDto.getEvents());
+            exitingCompilation.replaceEvents(events.stream().map(EventFullDto::getId).collect(Collectors.toSet()));
         }
 
         compilationRepository.save(exitingCompilation);

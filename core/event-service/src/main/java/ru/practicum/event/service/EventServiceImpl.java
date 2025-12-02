@@ -34,10 +34,7 @@ import ru.practicum.user.dto.UserDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.event.model.EventMapper.toEventFullDto;
@@ -329,6 +326,13 @@ public class EventServiceImpl implements EventService {
         result.setConfirmedRequests(confirmedRequests);
         result.setRejectedRequests(rejectedRequests);
         return result;
+    }
+
+    @Override
+    public Set<EventFullDto> getEventByIdIn(List<Long> eventIds) {
+        return eventRepository.findAllByIdIn(eventIds).stream()
+                .map(EventMapper::toEventFullDto)
+                .collect(Collectors.toSet());
     }
 
 

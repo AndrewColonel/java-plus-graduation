@@ -4,11 +4,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.model.RequestPublicParams;
 
 import java.util.List;
+import java.util.Set;
 
 public interface PublicEventControllerOperations {
     @GetMapping
@@ -25,4 +27,7 @@ public interface PublicEventControllerOperations {
 
     @GetMapping("/{eventId}")
     EventFullDto getById(@PathVariable Long eventId);
+
+    @GetMapping
+    Set<EventFullDto> getAllByIdIn(@RequestBody List<Long> eventIds);
 }

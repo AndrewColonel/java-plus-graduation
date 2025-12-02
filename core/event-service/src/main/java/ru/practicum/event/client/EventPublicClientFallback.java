@@ -8,6 +8,7 @@ import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.model.RequestPublicParams;
 
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -28,5 +29,11 @@ public class EventPublicClientFallback implements EventPublicClient {
     public EventFullDto getById(Long eventId) {
         log.warn("Fallback EventPublicClient response: сервис getById временно недоступен");
         return null;
+    }
+
+    @Override
+    public Set<EventFullDto> getAllByIdIn(List<Long> eventIds) {
+        log.warn("Fallback EventPublicClient response: сервис getAllByIdIn временно недоступен");
+        return Set.of();
     }
 }

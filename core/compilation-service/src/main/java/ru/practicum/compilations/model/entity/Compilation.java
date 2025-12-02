@@ -3,7 +3,6 @@ package ru.practicum.compilations.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import ru.practicum.event.model.Event;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,14 +26,20 @@ public class Compilation {
     @Column(nullable = false)
     private Boolean pinned;
 
-    @ManyToMany
-    @JoinTable(
+//    @ManyToMany
+//    @JoinTable(
+//            name = "compilation_events",
+//            joinColumns = @JoinColumn(name = "compilation_id"),
+//            inverseJoinColumns = @JoinColumn(name = "event_id")
+//    )
+
+    @ElementCollection
+    @CollectionTable(
             name = "compilation_events",
-            joinColumns = @JoinColumn(name = "compilation_id"),
-            inverseJoinColumns = @JoinColumn(name = "event_id")
+            joinColumns = @JoinColumn(name = "compilation_id")
     )
-    @Builder.Default
-    private Set<Event> events = new HashSet<>();
+     @Builder.Default
+    private Set<Long> events = new HashSet<>();
 
 
     /**
@@ -57,7 +62,7 @@ public class Compilation {
      *
      * @param newEvents новый набор событий
      */
-    public void replaceEvents(Set<Event> newEvents) {
+    public void replaceEvents(Set<Long> newEvents) {
         this.events.clear();
         if (newEvents != null && !newEvents.isEmpty()) {
             this.events.addAll(newEvents);

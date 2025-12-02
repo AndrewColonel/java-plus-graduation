@@ -11,6 +11,7 @@ import ru.practicum.event.model.RequestPublicParams;
 import ru.practicum.logging.Loggable;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/events")
@@ -46,5 +47,12 @@ public class PublicEventController implements PublicEventControllerOperations {
     @Override
     public EventFullDto getById(@PathVariable Long eventId) {
         return eventService.getById(eventId);
+    }
+
+    @Loggable
+    @GetMapping
+    @Override
+    public Set<EventFullDto> getAllByIdIn(@RequestBody List<Long> eventIds) {
+        return eventService.getEventByIdIn(eventIds);
     }
 }

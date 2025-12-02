@@ -9,6 +9,7 @@ import ru.practicum.requests.dto.EventRequestStatusUpdateResult;
 import ru.practicum.requests.dto.RequestDto;
 
 import java.util.List;
+import java.util.Set;
 
 public interface EventService {
 
@@ -33,4 +34,6 @@ public interface EventService {
     List<RequestDto> getEventParticipants(Long userId, Long eventId);
 
     EventRequestStatusUpdateResult changeRequestStatus(Long userId, Long eventId, EventRequestStatusUpdateRequest req);
+
+    Set<EventFullDto> getEventByIdIn(List<Long> eventIds);
 }

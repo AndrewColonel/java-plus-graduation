@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.compilations.client.EventClient;
 import ru.practicum.compilations.dto.*;
+import ru.practicum.compilations.dto.ext.EventShortDto;
 import ru.practicum.compilations.model.entity.Compilation;
 import ru.practicum.compilations.model.CompilationMapper;
 import ru.practicum.compilations.repository.CompilationRepository;

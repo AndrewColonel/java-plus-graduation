@@ -2,7 +2,7 @@ package ru.practicum.compilations.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.practicum.compilations.dto.EventShortDto;
+import ru.practicum.compilations.dto.ext.EventShortDto;
 
 import java.util.List;
 import java.util.Set;

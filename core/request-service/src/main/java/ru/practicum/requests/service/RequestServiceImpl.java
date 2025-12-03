@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 
-import ru.practicum.event.client.EventPublicClient;
+import ru.practicum.requests.client.event.EventClient;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.model.State;
 import ru.practicum.exception.ConflictException;
@@ -15,7 +15,7 @@ import ru.practicum.requests.repository.RequestRepository;
 import ru.practicum.requests.dto.RequestDto;
 import ru.practicum.requests.model.entity.Request;
 import ru.practicum.requests.model.RequestMapper;
-import ru.practicum.user.client.UserAdminClient;
+import ru.practicum.requests.client.user.UserClient;
 import ru.practicum.user.dto.UserDto;
 
 
@@ -30,9 +30,9 @@ import static ru.practicum.requests.model.RequestMapper.toEntity;
 @Slf4j
 public class RequestServiceImpl implements RequestService {
 
-    private final UserAdminClient userAdminClient;
+    private final UserClient userAdminClient;
     private final RequestRepository requestRepository;
-    private final EventPublicClient eventPublicClient;
+    private final EventClient eventPublicClient;
 
     /**
      * Получение информации о заявках текущего пользователя на участие в чужих событиях

@@ -4,14 +4,15 @@ package ru.practicum.compilations.model;
 import org.springframework.stereotype.Component;
 import ru.practicum.compilations.dto.AdminNewCompilationParamDto;
 import ru.practicum.compilations.dto.CompilationDto;
+import ru.practicum.compilations.dto.EventShortDto;
 import ru.practicum.compilations.model.entity.Compilation;
-import ru.practicum.event.dto.EventShortDto;
+
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 
 @Component
 public class CompilationMapper {

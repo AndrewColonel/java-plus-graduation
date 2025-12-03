@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import ru.practicum.category.client.CategoryPublicClient;
+import ru.practicum.event.client.category.CategoryClient;
 import ru.practicum.client.StatsClient;
 import ru.practicum.compilations.dto.EndpointHitDto;
 import ru.practicum.compilations.dto.ViewStatsDto;
@@ -22,13 +22,12 @@ import ru.practicum.event.model.entity.Event;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
-import ru.practicum.requests.client.RequestPrivatClient;
+import ru.practicum.event.client.request.RequestClient;
 import ru.practicum.requests.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.requests.dto.EventRequestStatusUpdateResult;
 import ru.practicum.requests.dto.RequestDto;
-import ru.practicum.requests.model.RequestMapper;
 import ru.practicum.requests.model.entity.Request;
-import ru.practicum.user.client.UserAdminClient;
+import ru.practicum.requests.client.user.UserClient;
 import ru.practicum.user.dto.UserDto;
 
 
@@ -47,9 +46,9 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final StatsClient statsClient;
 
-    private final UserAdminClient userAdminClient;
-    private final CategoryPublicClient categoryPublicClient;
-    private final RequestPrivatClient requestPrivatClient;
+    private final UserClient userAdminClient;
+    private final CategoryClient categoryPublicClient;
+    private final RequestClient requestPrivatClient;
 
     private static final String STATS_DATE_FROM = "2025-01-01 00:00:00";
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

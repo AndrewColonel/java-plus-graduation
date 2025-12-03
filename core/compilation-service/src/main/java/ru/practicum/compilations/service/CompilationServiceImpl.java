@@ -4,17 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.practicum.compilations.client.EventClient;
+import ru.practicum.compilations.dto.*;
 import ru.practicum.compilations.model.entity.Compilation;
 import ru.practicum.compilations.model.CompilationMapper;
 import ru.practicum.compilations.repository.CompilationRepository;
-import ru.practicum.compilations.dto.AdminNewCompilationParamDto;
-import ru.practicum.compilations.dto.AdminUpdateCompilationParamDto;
-import ru.practicum.compilations.dto.CompilationDto;
-import ru.practicum.compilations.dto.PublicCompilationRequestParamsDto;
 
-import ru.practicum.event.client.EventPublicClient;
-
-import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.exception.EntityNotExistsException;
 
 import java.util.*;
@@ -28,7 +23,7 @@ import java.util.stream.Collectors;
 public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
-    private final EventPublicClient eventPublicClient;
+    private final EventClient eventClient;
 
 
     /**
@@ -54,7 +49,7 @@ public class CompilationServiceImpl implements CompilationService {
 
         Set<EventShortDto> events = new HashSet<>();
         if (adminNewCompilationParamDto.getEvents() != null && !adminNewCompilationParamDto.getEvents().isEmpty()) {
-            events = eventPublicClient.getAllByIdIn(adminNewCompilationParamDto.getEvents());
+            events = eventClient.getAllByIdIn(adminNewCompilationParamDto.getEvents());
         }
         Compilation compilation = CompilationMapper.toEntity(adminNewCompilationParamDto);
         Compilation saved = compilationRepository.save(compilation);
@@ -92,7 +87,7 @@ public class CompilationServiceImpl implements CompilationService {
         // Обновляем список событий (если передан в запросе)
         Set<EventShortDto> events = new HashSet<>();
         if (adminUpdateCompilationParamDto.getEvents() != null) {
-            events = eventPublicClient.getAllByIdIn(adminUpdateCompilationParamDto.getEvents());
+            events = eventClient.getAllByIdIn(adminUpdateCompilationParamDto.getEvents());
             exitingCompilation.replaceEvents(events.stream().map(EventShortDto::getId).collect(Collectors.toSet()));
         }
 
@@ -110,7 +105,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto getCompilationById(long complId) {
         Compilation compilation = validateCompilationExists(complId);
-        Set<EventShortDto> events = eventPublicClient.getAllByIdIn(new ArrayList<>(compilation.getEvents()));
+        Set<EventShortDto> events = eventClient.getAllByIdIn(new ArrayList<>(compilation.getEvents()));
         return CompilationMapper.toDto(compilation, events);
     }
 
@@ -139,7 +134,7 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
         Map<Long,EventShortDto> eventShortDtoMap =
-                eventPublicClient.getAllByIdIn(new ArrayList<>(eventIds)).stream()
+                eventClient.getAllByIdIn(new ArrayList<>(eventIds)).stream()
                         .collect(Collectors.toMap(EventShortDto::getId,
                                 Function.identity()));
 

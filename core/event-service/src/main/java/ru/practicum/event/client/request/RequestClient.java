@@ -1,4 +1,4 @@
-package ru.practicum.requests.client;
+package ru.practicum.event.client.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -12,8 +12,8 @@ import ru.practicum.requests.model.entity.Request;
 
 import java.util.List;
 
-@FeignClient(name = "request-service", path = "/users/{userId}/requests", fallback = RequestPrivatClientFallback.class)
-public interface RequestPrivatClient {
+@FeignClient(name = "request-service", path = "/users/{userId}/requests", fallback = RequestClientFallback.class)
+public interface RequestClient {
 
     @GetMapping
     List<RequestDto> getEventRequests(@RequestParam @Positive Long eventId);

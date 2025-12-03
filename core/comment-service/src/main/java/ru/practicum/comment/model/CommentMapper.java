@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import ru.practicum.comment.dto.CommentDto;
 import ru.practicum.comment.dto.NewCommentDto;
 import ru.practicum.comment.model.entity.Comment;
-import ru.practicum.user.model.UserMapper;
+
 
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

@@ -3,20 +3,17 @@ package ru.practicum.comment.service;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import ru.practicum.comment.client.event.EventClient;
+import ru.practicum.comment.client.user.UserClient;
 import ru.practicum.comment.repository.CommentSpecification;
 import ru.practicum.comment.repository.CommentsRepository;
 import ru.practicum.comment.dto.*;
 import ru.practicum.comment.model.entity.Comment;
 import ru.practicum.comment.model.CommentStatus;
 import ru.practicum.comment.model.CommentMapper;
-
-import ru.practicum.event.client.EventPublicClient;
-
-import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
-import ru.practicum.user.client.UserAdminClient;
-import ru.practicum.user.dto.UserDto;
+
 
 import java.util.List;
 
@@ -28,8 +25,8 @@ import static ru.practicum.comment.model.CommentMapper.toDto;
 public class CommentsServiceImpl implements CommentsService {
 
     private final CommentsRepository commentsRepository;
-    private final EventPublicClient eventPublicClient;
-    private final UserAdminClient userClient;
+    private final EventClient eventClient;
+    private final UserClient userClient;
 
     // Public
     @Override
@@ -102,7 +99,7 @@ public class CommentsServiceImpl implements CommentsService {
 
     // вспомогательные методы
     private EventFullDto getEvent(Long eventId) {
-        return eventPublicClient.getById(eventId);
+        return eventClient.getById(eventId);
     }
 
     private UserDto getUser(Long commentatorId) {

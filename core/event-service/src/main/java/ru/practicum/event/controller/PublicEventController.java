@@ -47,6 +47,12 @@ public class PublicEventController {
     }
 
     @Loggable
+    @GetMapping("/{eventId}")
+    public EventShortDto getShortEventById(@PathVariable Long eventId) {
+        return eventService.getShortEventById(eventId);
+    }
+
+    @Loggable
     @GetMapping
       public Set<EventShortDto> getAllByIdIn(@RequestBody List<Long> eventIds) {
         return eventService.getEventByIdIn(eventIds);

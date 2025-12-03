@@ -4,8 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.comment.dto.ext.UserShortDto;
 import ru.practicum.comment.model.CommentStatus;
-import ru.practicum.user.dto.UserShortDto;
+
 
 
 import java.time.LocalDateTime;

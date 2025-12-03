@@ -1,11 +1,10 @@
-package ru.practicum.event.dto;
+package ru.practicum.comment.dto.ext;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import ru.practicum.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
 

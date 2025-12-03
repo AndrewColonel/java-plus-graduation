@@ -26,10 +26,10 @@ public class Comment {
     private Long id;
 
     @Column(name = "event_id", nullable = false)
-    private Long event;
+    private Long eventId;
 
     @Column(name = "creator_id", nullable = false)
-    private Long creator;
+    private Long creatorId;
 
     @Column(name = "text", nullable = false)
     private String text;

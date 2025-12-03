@@ -37,6 +37,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.event.model.EventMapper.toEventFullDto;
+import static ru.practicum.event.model.EventMapper.toEventShortDto;
 
 @Service
 @AllArgsConstructor
@@ -241,6 +242,12 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto getById(Long eventId) {
         return toEventFullDto(eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found with id: " + eventId)));
+    }
+
+    @Override
+    public EventShortDto getShortEventById(Long eventId) {
+        return toEventShortDto(eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found with id: " + eventId)));
     }
 

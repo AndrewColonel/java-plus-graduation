@@ -5,17 +5,21 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.practicum.comment.client.event.EventClient;
 import ru.practicum.comment.client.user.UserClient;
+import ru.practicum.comment.dto.ext.EventShortDto;
+import ru.practicum.comment.dto.ext.UserShortDto;
 import ru.practicum.comment.repository.CommentSpecification;
 import ru.practicum.comment.repository.CommentsRepository;
 import ru.practicum.comment.dto.*;
 import ru.practicum.comment.model.entity.Comment;
 import ru.practicum.comment.model.CommentStatus;
-import ru.practicum.comment.model.CommentMapper;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static ru.practicum.comment.model.CommentMapper.toComment;
 import static ru.practicum.comment.model.CommentMapper.toDto;
@@ -31,79 +35,85 @@ public class CommentsServiceImpl implements CommentsService {
     // Public
     @Override
     public List<CommentDto> getCommentPublic(GetCommentsParam param) {
-        EventFullDto event = getEvent(param.getEventId());
+        EventShortDto event = getEvent(param.getEventId());
+        List<Comment> commentList = commentsRepository.findByEventIdAndStatusOrderByCreateTimeDesc(event.getId(),
+                CommentStatus.MODERATED_OPEN, param.toPage());
         // для публичного показа допускаются комментарии после модерации администртором
-        return commentsRepository.findByEventIdAndStatusOrderByCreateTimeDesc(event.getId(),
-                        CommentStatus.MODERATED_OPEN, param.toPage())
-                .stream()
-                .map(CommentMapper::toDto)
+        return commentList.stream()
+                .map(c -> toDto(c, getUserShortDtoMap(commentList)))
                 .toList();
     }
 
     // Private
     @Override
     public CommentDto createCommentPrivate(NewCommentDto newCommentDto, CreateCommentParam param) {
-        EventFullDto event = getEvent(param.getEventId());
-        UserDto creator = getUser(param.getUserId());
+        EventShortDto event = getEvent(param.getEventId());
+        UserShortDto creator = getUser(param.getUserId());
         Comment comment = toComment(newCommentDto);
-        comment.setCreator(creator.getId());
-        comment.setEvent(event.getId());
+        comment.setCreatorId(creator.getId());
+        comment.setEventId(event.getId());
         comment.setStatus(CommentStatus.OPEN);
-        return toDto(commentsRepository.save(comment));
+        return toDto(commentsRepository.save(comment), creator);
     }
 
     @Override
     public CommentDto updateCommentPrivate(NewCommentDto newCommentDto, UpdateCommentParam param) {
         Comment checkedComment = checkCommentAvailability(param);
         checkedComment.setText(newCommentDto.getText());
+        UserShortDto creator = getUser(checkedComment.getCreatorId());
         if (param.getStatus() != null) {
             checkedComment.setStatus(checkCreatorCommentStatus(param.getStatus()));
         }
-        return toDto(commentsRepository.save(checkedComment));
+        return toDto(commentsRepository.save(checkedComment), creator);
     }
 
     @Override
     public List<CommentDto> getCommentPrivate(GetCommentsParam param, Long userId) {
-        return commentsRepository.findByEventIdAndCreatorIdOrderByCreateTimeDesc(param.getEventId(),
-                        userId, param.toPage()).stream()
-                .map(CommentMapper::toDto)
+        List<Comment> commentList = commentsRepository.findByEventIdAndCreatorIdOrderByCreateTimeDesc(param.getEventId(),
+                userId, param.toPage());
+
+        return commentList.stream()
+                .map(c -> toDto(c, getUserShortDtoMap(commentList)))
                 .toList();
     }
 
     @Override
     public CommentDto deleteCommentPrivate(UpdateCommentParam param) {
         Comment checkedComment = checkCommentAvailability(param);
+        UserShortDto creator = getUser(checkedComment.getCreatorId());
         commentsRepository.delete(checkedComment);
-        return toDto(checkedComment);
+        return toDto(checkedComment, creator);
     }
 
     // Admin
     @Override
     public List<CommentDto> searchCommentAdmin(SearchCommentParam param, CommentStatus status) {
         Specification<Comment> spec = CommentSpecification.byParams(param, status);
-        return commentsRepository.findAll(spec, param.toPage()).getContent().stream()
-                .map(CommentMapper::toDto)
+        List<Comment> commentList = commentsRepository.findAll(spec, param.toPage()).getContent();
+        return commentList.stream()
+                .map(c -> toDto(c, getUserShortDtoMap(commentList)))
                 .toList();
     }
 
     @Override
     public CommentDto updateCommentAdmin(Long commentId, CommentStatus commentStatus) {
         Comment comment = getComment(commentId);
+        UserShortDto creator = getUser(comment.getCreatorId());
         // можно модерировать только комментарии со статусом OPEN
         if (comment.getStatus().equals(CommentStatus.HIDDEN))
             throw new ValidationException(String.format("Комментарий еще не опубликован, status = %s",
                     comment.getStatus()));
         comment.setStatus(checkAdminCommentStatus(commentStatus));
-        return toDto(commentsRepository.save(comment));
+        return toDto(commentsRepository.save(comment), creator);
     }
 
     // вспомогательные методы
-    private EventFullDto getEvent(Long eventId) {
-        return eventClient.getById(eventId);
+    private EventShortDto getEvent(Long eventId) {
+        return eventClient.getShortEventById(eventId);
     }
 
-    private UserDto getUser(Long commentatorId) {
-        return userClient.getUserById(commentatorId);
+    private UserShortDto getUser(Long commentatorId) {
+        return userClient.getShortUserById(commentatorId);
     }
 
     private Comment getComment(Long commentId) {
@@ -112,11 +122,21 @@ public class CommentsServiceImpl implements CommentsService {
                         commentId)));
     }
 
+    // метод для получения мапы объектов UserShortDto
+    private Map<Long, UserShortDto> getUserShortDtoMap(List<Comment> commentList) {
+        List<Long> creatorIds = commentList.stream()
+                .map(Comment::getCreatorId)
+                .toList();
+        return userClient.findByIdIn(creatorIds).stream()
+                .collect(Collectors.toMap(UserShortDto::getId, Function.identity()));
+
+    }
+
     // метод проверяет доступность комментария для изменения
     private Comment checkCommentAvailability(UpdateCommentParam param) {
-        EventFullDto event = getEvent(param.getEventId());
+        EventShortDto event = getEvent(param.getEventId());
         Comment comment = getComment(param.getCommentId());
-        if (!comment.getEvent().equals(event.getId())) {
+        if (!comment.getEventId().equals(event.getId())) {
             throw new ValidationException(String.format("Комментарий с id %s не относится к событию с id %s",
                     comment.getId(), event.getId()));
         }
@@ -127,13 +147,13 @@ public class CommentsServiceImpl implements CommentsService {
                     String.format("Изменить данный коммментарий после модерации нельзя status = %s",
                             comment.getStatus()));
         }
-        UserDto commentator = getUser(param.getUserId());
+        UserShortDto commentator = getUser(param.getUserId());
         // Можно менять только свой комментарий
-        if (!comment.getCreator().equals(commentator.getId())) {
+        if (!comment.getCreatorId().equals(commentator.getId())) {
             throw new ValidationException(
                     String.format("Можно менять только свои комментарии, " +
                                     "id польтзователя %s не равен id комментатора %s",
-                            comment.getCreator(), commentator.getId()));
+                            comment.getCreatorId(), commentator.getId()));
         }
         return comment;
     }

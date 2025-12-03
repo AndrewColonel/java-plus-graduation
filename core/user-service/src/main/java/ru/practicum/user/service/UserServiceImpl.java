@@ -7,15 +7,16 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.dto.GetUserRequest;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
+import ru.practicum.user.dto.UserShortDto;
 import ru.practicum.user.model.ActiveUser;
 import ru.practicum.user.model.entity.User;
 import ru.practicum.user.model.UserMapper;
 import ru.practicum.user.repository.UserRepository;
 
 import java.util.Collection;
+import java.util.List;
 
-import static ru.practicum.user.model.UserMapper.toUser;
-import static ru.practicum.user.model.UserMapper.toUserDto;
+import static ru.practicum.user.model.UserMapper.*;
 
 @Service
 @AllArgsConstructor
@@ -62,6 +63,17 @@ public class UserServiceImpl implements UserService {
         return toUserDto(getUser(userId));
     }
 
+    @Override
+    public UserShortDto findShortUserById(Long userId) {
+        return toUserShortDto(getUser(userId));
+    }
+
+    @Override
+    public List<UserShortDto> findShortUserByIdIn(List<Long> ids) {
+        return userRepository.findByIdIn(ids).stream()
+                .map(UserMapper::toUserShortDto)
+                .toList();
+    }
 
     // вспомогательный метод
     public User getUser(Long userId) {

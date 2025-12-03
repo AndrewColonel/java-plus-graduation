@@ -17,12 +17,11 @@ import java.util.Collection;
 @Slf4j
 @Validated
 @RequestMapping("/categories")
-public class CategoryControllerPublic implements CategoryControllerPublicOperations {
+public class CategoryControllerPublic {
 
     private final CategoryService categoryService;
 
     @GetMapping
-    @Override
     public Collection<CategoryDto> getAll(
             @PositiveOrZero @RequestParam(name = "from", defaultValue = "0", required = false) Integer from,
             @Positive @RequestParam(name = "size", defaultValue = "10", required = false) Integer size) {
@@ -34,8 +33,7 @@ public class CategoryControllerPublic implements CategoryControllerPublicOperati
     }
 
     @GetMapping("/{catId}")
-    @Override
-    public CategoryDto getById(@Positive @NotNull @PathVariable(value = "catId") Long catId) {
+      public CategoryDto getById(@Positive @NotNull @PathVariable(value = "catId") Long catId) {
         log.warn(">>> CategoryControllerPublic: GET /categories/{}", catId);
         log.warn(">>> Запрос категории с ID = {}", catId);
         CategoryDto dto = categoryService.getCategoryById(catId);

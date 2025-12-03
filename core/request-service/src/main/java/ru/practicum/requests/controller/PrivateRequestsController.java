@@ -20,12 +20,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 @Slf4j
-public class PrivateRequestsController implements PrivateRequestsControllerOperations {
+public class PrivateRequestsController {
     private final RequestService requestService;
 
     @GetMapping
-    @Override
-    public List<RequestDto> getUserRequests(@PathVariable @Positive Long userId) {
+      public List<RequestDto> getUserRequests(@PathVariable @Positive Long userId) {
         log.warn(">>> PrivateRequestsController: GET /users/{}/requests", userId);
         log.warn(">>> Получение информации о заявках пользователя с ID {} на участие в чужих событиях", userId);
         List<RequestDto> dtoList = requestService.getUserRequests(userId);
@@ -35,8 +34,7 @@ public class PrivateRequestsController implements PrivateRequestsControllerOpera
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Override
-    public RequestDto addParticipationRequest(
+      public RequestDto addParticipationRequest(
             @PathVariable @Positive Long userId,
             @RequestParam @Positive Long eventId) {
         log.warn(">>> PrivateRequestsController: POST /users/{}/requests", userId);
@@ -47,7 +45,6 @@ public class PrivateRequestsController implements PrivateRequestsControllerOpera
     }
 
     @PatchMapping("/{requestId}/cancel")
-    @Override
     public RequestDto cancelRequest(
             @PathVariable @Positive Long userId,
             @PathVariable @Positive Long requestId) {
@@ -60,22 +57,19 @@ public class PrivateRequestsController implements PrivateRequestsControllerOpera
 
     @Loggable
     @GetMapping
-    @Override
-    public List<RequestDto> getEventRequests(@RequestParam @Positive Long eventId) {
+      public List<RequestDto> getEventRequests(@RequestParam @Positive Long eventId) {
         return requestService.getEventRequests(eventId);
     }
 
     @Loggable
     @GetMapping
-    @Override
-    public List<RequestDto> findAllRequests(@RequestBody @NotNull List<Long> requestIds) {
+       public List<RequestDto> findAllRequests(@RequestBody @NotNull List<Long> requestIds) {
         return requestService.findAllRequests(requestIds);
     }
 
     @Loggable
     @GetMapping
-    @Override
-    public Long countRequest(@RequestParam @Positive Long eventId,
+       public Long countRequest(@RequestParam @Positive Long eventId,
                              @RequestParam @NotNull Request.RequestStatus status) {
         return requestService.countRequest(eventId, status);
     }
@@ -83,15 +77,13 @@ public class PrivateRequestsController implements PrivateRequestsControllerOpera
 
     @Loggable
     @PostMapping
-    @Override
     public List<RequestDto> saveAllRequests(@RequestBody @NotNull List<RequestDto> requestDtoList) {
         return requestService.saveAllRequests(requestDtoList);
     }
 
     @Loggable
     @GetMapping
-    @Override
-    public List<RequestDto> findRequestByStatus(@RequestBody @NotNull List<Long> requestId,
+       public List<RequestDto> findRequestByStatus(@RequestBody @NotNull List<Long> requestId,
                                                 @RequestParam @NotNull Request.RequestStatus status) {
         return requestService.findRequestByStatus(requestId, status);
     }

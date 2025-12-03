@@ -15,14 +15,13 @@ import ru.practicum.compilations.service.CompilationService;
 @RequestMapping("/admin/compilations")
 @RequiredArgsConstructor
 @Slf4j
-public class AdminCompilationController implements AdminCompilationControllerOperations {
+public class AdminCompilationController {
 
     private final CompilationService compilationService;
 
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Override
     public CompilationDto addCompilation(
             @Valid @RequestBody AdminNewCompilationParamDto adminNewCompilationParamDto
     ) {
@@ -35,7 +34,6 @@ public class AdminCompilationController implements AdminCompilationControllerOpe
 
     @DeleteMapping("/{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Override
     public void deleteCompilation(
             @PathVariable Long compId
     ) {
@@ -47,7 +45,6 @@ public class AdminCompilationController implements AdminCompilationControllerOpe
 
 
     @PatchMapping("/{compId}")
-    @Override
     public CompilationDto updateCompilation(
             @PathVariable Long compId,
             @Valid @RequestBody AdminUpdateCompilationParamDto adminUpdateCompilationParamDto

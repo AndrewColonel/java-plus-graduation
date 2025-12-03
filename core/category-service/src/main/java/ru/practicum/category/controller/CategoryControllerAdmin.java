@@ -19,14 +19,13 @@ import ru.practicum.category.dto.UpdateCategoryDto;
 @Validated
 @RequestMapping("/admin/categories")
 @AllArgsConstructor
-public class CategoryControllerAdmin implements CategoryControllerAdminOperations {
+public class CategoryControllerAdmin {
 
     private final CategoryService categoryService;
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    @Override
-    public CategoryDto create(@Valid @RequestBody NewCategoryDto newCategoryDto) {
+      public CategoryDto create(@Valid @RequestBody NewCategoryDto newCategoryDto) {
         log.warn(">>> CategoryControllerAdmin: POST /admin/categories");
         log.warn(">>> Запрос на создание категории {}", newCategoryDto);
         CategoryDto dto = categoryService.createCategory(newCategoryDto);
@@ -37,7 +36,6 @@ public class CategoryControllerAdmin implements CategoryControllerAdminOperation
     }
 
     @PatchMapping("/{catId}")
-    @Override
     public CategoryDto update(@Positive @NotNull @PathVariable("catId") Long catId,
                               @Valid @RequestBody UpdateCategoryDto updateCategoryDto) {
         log.warn(">>> CategoryControllerAdmin: PATCH /admin/categories/{}", catId);
@@ -49,7 +47,6 @@ public class CategoryControllerAdmin implements CategoryControllerAdminOperation
 
     @DeleteMapping("/{catId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @Override
     public void delete(@Positive @NotNull @PathVariable("catId") Long catId) {
         log.warn(">>> CategoryControllerAdmin: DELETE /admin/categories/{}", catId);
         log.warn(">>> Запрос на удление категории с ID = {}", catId);

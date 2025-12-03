@@ -24,12 +24,11 @@ import java.util.List;
 @Validated
 @RequestMapping("/admin/users")
 @Slf4j
-public class UserControllerAdmin implements UserControllerAdminOperations {
+public class UserControllerAdmin {
 
     private final UserService userService;
 
     @GetMapping
-    @Override
     public Collection<UserDto> getAll(
             @RequestParam(name = "ids", required = false) List<Long> ids,
             @PositiveOrZero @RequestParam(name = "from", required = false, defaultValue = "0") Integer from,
@@ -43,7 +42,6 @@ public class UserControllerAdmin implements UserControllerAdminOperations {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Override
     public UserDto create(@Valid @RequestBody NewUserRequest newUserRequest) {
         log.warn(">>> UserControllerAdmin: POST /admin/users");
         log.warn(">>> Запрос на создание пользователя {}", newUserRequest);
@@ -54,7 +52,6 @@ public class UserControllerAdmin implements UserControllerAdminOperations {
 
     @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Override
     public void delete(@Positive @PathVariable("userId") Long userId) {
         log.warn(">>> UserControllerAdmin: DELETE /admin/users/{}", userId);
         log.warn(">>> Запрос на удаление пользователя с ID = {}", userId);
@@ -63,7 +60,6 @@ public class UserControllerAdmin implements UserControllerAdminOperations {
     }
 
     @PatchMapping("/{userId}")
-    @Override
     public void activate(@Positive @PathVariable("userId") Long userId,
                          @RequestParam(name = "activated", required = false) String approveStateString) {
         ActiveUser approved = ActiveUser.from(approveStateString).orElseThrow(
@@ -75,7 +71,6 @@ public class UserControllerAdmin implements UserControllerAdminOperations {
 
     @Loggable
     @GetMapping("/{userId}")
-    @Override
     public UserDto getUserById(@Positive @PathVariable("userId") Long userId) {
         return userService.findUserById(userId);
     }

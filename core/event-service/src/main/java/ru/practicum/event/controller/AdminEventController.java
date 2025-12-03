@@ -15,12 +15,11 @@ import java.util.List;
 @RequestMapping("/admin/events")
 @RequiredArgsConstructor
 @Slf4j
-public class AdminEventController implements AdminEventControllerOperations {
+public class AdminEventController {
 
     private final EventService eventService;
 
     @GetMapping
-    @Override
     public List<EventFullDto> getAllEvents(
             @ModelAttribute RequestAdminParams params
     ) {
@@ -33,8 +32,7 @@ public class AdminEventController implements AdminEventControllerOperations {
 
 
     @PatchMapping("/{eventId}")
-    @Override
-    public EventFullDto updateEvent(
+     public EventFullDto updateEvent(
             @PathVariable Long eventId,
             @RequestBody @Valid UpdateEventAdminRequest request
     ) {

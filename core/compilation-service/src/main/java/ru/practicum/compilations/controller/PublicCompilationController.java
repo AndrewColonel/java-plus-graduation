@@ -17,12 +17,11 @@ import java.util.List;
 @RequestMapping("/compilations")
 @Slf4j
 @RequiredArgsConstructor
-public class PublicCompilationController implements PublicCompilationControllerOperations {
+public class PublicCompilationController {
 
     private final CompilationService compilationService;
 
     @GetMapping("/{complId}")
-    @Override
     public CompilationDto getCompilationById(@PathVariable Long complId) {
         log.warn(">>> PublicCompilationController: GET /compilations/{complId}");
         log.warn(">>> Получение подборки по ID = {} ", complId);
@@ -33,7 +32,6 @@ public class PublicCompilationController implements PublicCompilationControllerO
     }
 
     @GetMapping
-    @Override
     public List<CompilationDto> getCompilationsList(PublicCompilationRequestParamsDto params) {
         log.warn(">>> PublicCompilationController: GET /compilations");
         log.warn(">>> Получение подборок событий. Параметры запроса: " +

@@ -17,13 +17,12 @@ import java.util.Set;
 @RequestMapping("/events")
 @RequiredArgsConstructor
 @Slf4j
-public class PublicEventController implements PublicEventControllerOperations {
+public class PublicEventController {
 
     private final EventService eventService;
 
     @Loggable
     @GetMapping
-    @Override
     public List<EventShortDto> getEvents(
             @ModelAttribute RequestPublicParams params,
             HttpServletRequest request
@@ -33,8 +32,7 @@ public class PublicEventController implements PublicEventControllerOperations {
 
     @Loggable
     @GetMapping("/{eventId}")
-    @Override
-    public EventFullDto getEventById(
+       public EventFullDto getEventById(
             @PathVariable Long eventId,
             HttpServletRequest request
     ) {
@@ -44,15 +42,13 @@ public class PublicEventController implements PublicEventControllerOperations {
 
     @Loggable
     @GetMapping("/{eventId}")
-    @Override
     public EventFullDto getById(@PathVariable Long eventId) {
         return eventService.getById(eventId);
     }
 
     @Loggable
     @GetMapping
-    @Override
-    public Set<EventShortDto> getAllByIdIn(@RequestBody List<Long> eventIds) {
+      public Set<EventShortDto> getAllByIdIn(@RequestBody List<Long> eventIds) {
         return eventService.getEventByIdIn(eventIds);
     }
 }

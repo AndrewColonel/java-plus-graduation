@@ -6,17 +6,19 @@ import org.springframework.stereotype.Service;
 
 
 import ru.practicum.requests.client.event.EventClient;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.model.State;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.EntityNotExistsException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.requests.dto.ext.EventFullDto;
+import ru.practicum.requests.dto.ext.State;
+import ru.practicum.requests.dto.ext.UserShortDto;
+import ru.practicum.requests.model.RequestStatus;
 import ru.practicum.requests.repository.RequestRepository;
 import ru.practicum.requests.dto.RequestDto;
 import ru.practicum.requests.model.entity.Request;
 import ru.practicum.requests.model.RequestMapper;
 import ru.practicum.requests.client.user.UserClient;
-import ru.practicum.user.dto.UserDto;
+
 
 
 import java.time.LocalDateTime;
@@ -70,7 +72,7 @@ public class RequestServiceImpl implements RequestService {
     public RequestDto addParticipationRequest(Long userId, Long eventId) {
         log.warn("addParticipationRequest(Long {}, Long {})", userId, eventId);
         // Проверить существование пользователя.
-        UserDto existedUser = validateUserExists(userId);
+        UserShortDto existedUser = validateUserExists(userId);
         // Проверить существование события.
         EventFullDto existedEvent = validateEventExists(eventId);
 
@@ -86,7 +88,7 @@ public class RequestServiceImpl implements RequestService {
 
         // Проверка лимита участников
         if (existedEvent.getParticipantLimit() > 0 &&
-                requestRepository.countByEventIdAndStatus(eventId, Request.RequestStatus.CONFIRMED) >=
+                requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED) >=
                         existedEvent.getParticipantLimit()) {
             throw new ConflictException("Превышен лимит участников события");
         }
@@ -98,7 +100,7 @@ public class RequestServiceImpl implements RequestService {
 
         Request newRequest = new Request();
         newRequest.setRequesterId(existedUser.getId());
-        newRequest.setEvent(existedEvent.getId());
+        newRequest.setEventId(existedEvent.getId());
         newRequest.setCreated(LocalDateTime.now());
 
 
@@ -162,7 +164,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public Long countRequest(Long eventId, Request.RequestStatus status) {
+    public Long countRequest(Long eventId, RequestStatus status) {
         return requestRepository.countByEventIdAndStatus(eventId,status);
     }
 
@@ -174,7 +176,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<RequestDto> findRequestByStatus(List<Long> requestId,Request.RequestStatus status) {
+    public List<RequestDto> findRequestByStatus(List<Long> requestId, RequestStatus status) {
         return requestRepository.findByEventIdInAndStatus(requestId, status).stream()
                 .map(RequestMapper::toDto)
                 .toList();
@@ -222,7 +224,7 @@ public class RequestServiceImpl implements RequestService {
      * @param userId ID пользователя
      * @return Если существует, возвращается User
      */
-    private UserDto validateUserExists(Long userId) {
+    private UserShortDto validateUserExists(Long userId) {
         log.warn("validateUserExists(Long {})", userId);
         // Проверка на null ID
         if (userId == null) {
@@ -230,7 +232,7 @@ public class RequestServiceImpl implements RequestService {
         }
 
         // Проверка существования подборки
-        return userClient.getUserById(userId);
+        return userClient.getShortUserById(userId);
     }
 
 }

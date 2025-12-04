@@ -12,7 +12,7 @@ public class RequestMapper {
         return RequestDto.builder()
                 .id(request.getId())
                 .created(request.getCreated())
-                .event(request.getEvent())
+                .event(request.getEventId())
                 .requester(request.getRequesterId())
                 .status(request.getStatus().toString())
                 .build();
@@ -28,9 +28,9 @@ public class RequestMapper {
         return Request.builder()
                 .id(requestDto.getId())
                 .created(requestDto.getCreated())
-                .event(requestDto.getEvent())
-                .requester(requestDto.getRequester())
-                .status(Request.RequestStatus.valueOf(requestDto.getStatus()))
+                .eventId(requestDto.getEvent())
+                .requesterId(requestDto.getRequester())
+                .status(RequestStatus.valueOf(requestDto.getStatus()))
                 .build();
     }
 

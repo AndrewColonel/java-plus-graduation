@@ -1,7 +1,7 @@
 package ru.practicum.requests.service;
 
 import ru.practicum.requests.dto.RequestDto;
-import ru.practicum.requests.model.entity.Request;
+import ru.practicum.requests.model.RequestStatus;
 
 import java.util.List;
 
@@ -37,10 +37,10 @@ public interface RequestService {
 
     List<RequestDto> findAllRequests(List<Long> requestIds);
 
-    Long countRequest(Long eventId, Request.RequestStatus status);
+    Long countRequest(Long eventId, RequestStatus status);
 
     List<RequestDto> saveAllRequests(List<RequestDto> requestDtoList);
 
-    List<RequestDto> findRequestByStatus(List<Long> requestId,Request.RequestStatus status);
+    List<RequestDto> findRequestByStatus(List<Long> requestId,RequestStatus status);
 
 }

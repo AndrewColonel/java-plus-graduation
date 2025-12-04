@@ -70,21 +70,4 @@ public class UserControllerAdmin {
         userService.activateUser(userId, approved);
     }
 
-    @Loggable
-    @GetMapping("/{userId}")
-    public UserDto getUserById(@Positive @PathVariable("userId") Long userId) {
-        return userService.findUserById(userId);
-    }
-
-    @Loggable
-    @GetMapping("/{userId}")
-    public UserShortDto getShortUserById(@Positive @PathVariable("userId") Long userId) {
-        return userService.findShortUserById(userId);
-    }
-
-    @Loggable
-    @GetMapping
-    public List<UserShortDto> findByIdIn(@RequestParam(name = "ids", required = false) List<Long> ids) {
-        return userService.findShortUserByIdIn(ids);
-    }
 }

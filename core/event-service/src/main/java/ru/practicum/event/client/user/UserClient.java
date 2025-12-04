@@ -11,7 +11,7 @@ import ru.practicum.event.dto.ext.UserShortDto;
 import java.util.List;
 
 
-@FeignClient(name = "user-service", path = "/admin/users", fallback = UserClientFallback.class)
+@FeignClient(name = "user-service", path = "/admin/users/client", fallback = UserClientFallback.class)
 public interface UserClient {
 
     @GetMapping("/{userId}")

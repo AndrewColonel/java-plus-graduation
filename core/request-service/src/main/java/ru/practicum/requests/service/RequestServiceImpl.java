@@ -30,9 +30,9 @@ import static ru.practicum.requests.model.RequestMapper.toEntity;
 @Slf4j
 public class RequestServiceImpl implements RequestService {
 
-    private final UserClient userAdminClient;
+    private final UserClient userClient;
     private final RequestRepository requestRepository;
-    private final EventClient eventPublicClient;
+    private final EventClient eventClient;
 
     /**
      * Получение информации о заявках текущего пользователя на участие в чужих событиях
@@ -97,7 +97,7 @@ public class RequestServiceImpl implements RequestService {
         }
 
         Request newRequest = new Request();
-        newRequest.setRequester(existedUser.getId());
+        newRequest.setRequesterId(existedUser.getId());
         newRequest.setEvent(existedEvent.getId());
         newRequest.setCreated(LocalDateTime.now());
 
@@ -134,7 +134,7 @@ public class RequestServiceImpl implements RequestService {
         Request existedRequest = validateRequestExists(requestId);
 
         // Проверить, что запрос принадлежит пользователю
-        if (!existedRequest.getRequester().equals(userId)) {
+        if (!existedRequest.getRequesterId().equals(userId)) {
             throw new NotFoundException("Запрос не принадлежит пользователю.");
         }
 
@@ -213,7 +213,7 @@ public class RequestServiceImpl implements RequestService {
         }
 
         // Проверка существования подборки
-        return eventPublicClient.getById(eventId);
+        return eventClient.getById(eventId);
     }
 
     /**
@@ -230,7 +230,7 @@ public class RequestServiceImpl implements RequestService {
         }
 
         // Проверка существования подборки
-        return userAdminClient.getUserById(userId);
+        return userClient.getUserById(userId);
     }
 
 }

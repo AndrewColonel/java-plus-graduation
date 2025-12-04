@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.requests.model.RequestStatus;
 
 import java.time.LocalDateTime;
 
@@ -20,10 +21,10 @@ public class Request {
     private Long id;
 
     @Column(name = "event_id", nullable = false)
-    private Long event;
+    private Long eventId;
 
     @Column(name = "requester_id", nullable = false)
-    private Long requester;
+    private Long requesterId;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -32,12 +33,12 @@ public class Request {
 
     private LocalDateTime created;
 
-    public enum RequestStatus {
-        PENDING, CONFIRMED, REJECTED, CANCELED
-    }
+//    public enum RequestStatus {
+//        PENDING, CONFIRMED, REJECTED, CANCELED
+//    }
 
     public Long getEventId() {
-        return event;
+        return eventId;
     }
 
     public boolean isPending() {

@@ -12,6 +12,9 @@ import ru.practicum.category.service.CategoryService;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.dto.UpdateCategoryDto;
+import ru.practicum.logging.Loggable;
+
+import java.util.List;
 
 
 @RestController
@@ -53,4 +56,11 @@ public class CategoryControllerAdmin {
         categoryService.deleteCategory(catId);
         log.warn("ИТОГ: категория с ID = {} удалена", catId);
     }
+
+    @Loggable
+    @GetMapping
+    public List<CategoryDto> findByIdIn(@RequestParam(name = "ids", required = false) List<Long> ids) {
+        return categoryService.findCategoryByIdIn(ids);
+    }
+
 }

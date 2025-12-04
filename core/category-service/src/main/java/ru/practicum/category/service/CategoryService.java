@@ -6,6 +6,7 @@ import ru.practicum.category.dto.UpdateCategoryDto;
 import ru.practicum.category.model.entity.Category;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface CategoryService {
     Collection<CategoryDto> getAllCategory(Integer from, Integer size);
@@ -19,4 +20,7 @@ public interface CategoryService {
     void deleteCategory(Long catId);
 
     Category getCategory(Long catId);
+
+    List<CategoryDto> findCategoryByIdIn(List<Long> ids);
+
 }

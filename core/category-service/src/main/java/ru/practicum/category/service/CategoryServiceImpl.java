@@ -12,6 +12,7 @@ import ru.practicum.category.model.CategoryMapper;
 import ru.practicum.exception.NotFoundException;
 
 import java.util.Collection;
+import java.util.List;
 
 import static ru.practicum.category.model.CategoryMapper.toCategory;
 import static ru.practicum.category.model.CategoryMapper.toCategoryDto;
@@ -52,6 +53,13 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Long catId) {
         Category category = getCategory(catId);
         categoryRepository.delete(category);
+    }
+
+    @Override
+    public List<CategoryDto> findCategoryByIdIn(List<Long> ids) {
+        return categoryRepository.findByIdIn(ids).stream()
+                .map(CategoryMapper::toCategoryDto)
+                .toList();
     }
 
     // вспомогательный метод

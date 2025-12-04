@@ -10,7 +10,7 @@ import ru.practicum.compilations.dto.ext.EventShortDto;
 import java.util.List;
 import java.util.Set;
 
-@FeignClient(name = "event-service", path = "/events", fallback = EventClientFallback.class)
+@FeignClient(name = "event-service", path = "/events/client", fallback = EventClientFallback.class)
 public interface EventClient {
 
     @GetMapping

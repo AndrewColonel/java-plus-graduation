@@ -35,7 +35,7 @@ public class Event {
     private LocalDateTime eventDate;
 
     @Column(name = "initiator_id")
-    private Long initiator;
+    private Long initiatorId;
 
     @Embedded
     private Location location;

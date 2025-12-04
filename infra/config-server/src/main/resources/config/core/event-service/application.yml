@@ -67,3 +67,7 @@ management:
   endpoint:
     health:
       show-details: always
+
+discovery:
+  services:
+    stats-server-id:  stats-server

@@ -14,7 +14,7 @@ import ru.practicum.requests.service.RequestService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users/{userId}/requestclient")
+@RequestMapping("/users/{userId}/request/client")
 @RequiredArgsConstructor
 @Validated
 @Slf4j

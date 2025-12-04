@@ -10,12 +10,11 @@ import ru.practicum.event.model.State;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
-    Page<Event> findAllByInitiatorOrderByCreatedOnDesc(Long initiatorId, Pageable pageable);
+    Page<Event> findAllByInitiatorIdOrderByCreatedOnDesc(Long initiatorId, Pageable pageable);
 
     Optional<Event> findEventByIdAndState(Long id, State state);
 
-    Set<Event> findAllByIdIn(List<Long> id);
+    List<Event> findAllByIdIn(List<Long> id);
 }

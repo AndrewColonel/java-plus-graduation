@@ -3,32 +3,30 @@ package ru.practicum.event.client.request;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import ru.practicum.requests.dto.RequestDto;
-import ru.practicum.requests.model.entity.Request;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.event.dto.ext.RequestDto;
+import ru.practicum.event.dto.ext.RequestStatus;
 
 import java.util.List;
 
-@FeignClient(name = "request-service", path = "/users/{userId}/requests", fallback = RequestClientFallback.class)
+@FeignClient(name = "request-service", path = "/users/{userId}/request/client", fallback = RequestClientFallback.class)
 public interface RequestClient {
 
-    @GetMapping
-    List<RequestDto> getEventRequests(@RequestParam @Positive Long eventId);
+    @GetMapping("/event/{eventId}")
+    List<RequestDto> getEventRequests(@PathVariable @Positive Long eventId);
 
-    @GetMapping
-    List<RequestDto> findAllRequests(@RequestBody @NotNull List<Long> requestIds);
-
-    @GetMapping
-    Long countRequest(@RequestParam @Positive Long eventId,
-                      @RequestParam @NotNull Request.RequestStatus status);
+    @GetMapping("/event/{eventId}/status")
+    Long countRequest(@PathVariable @Positive Long eventId,
+                      @RequestParam @NotNull RequestStatus status);
 
     @PostMapping
     List<RequestDto> saveAllRequests(@RequestBody @NotNull List<RequestDto> requestDtoList);
 
     @GetMapping
+    List<RequestDto> findAllRequests(@RequestBody @NotNull List<Long> requestIds);
+
+    @GetMapping("/status")
     List<RequestDto> findRequestByStatus(@RequestBody @NotNull List<Long> requestId,
-                                         @RequestParam @NotNull Request.RequestStatus status);
+                                         @RequestParam @NotNull RequestStatus status);
+
 }

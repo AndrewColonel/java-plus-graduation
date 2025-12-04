@@ -2,8 +2,9 @@ package ru.practicum.event.client.request;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.practicum.requests.dto.RequestDto;
-import ru.practicum.requests.model.entity.Request;
+import ru.practicum.event.dto.ext.RequestDto;
+import ru.practicum.event.dto.ext.RequestStatus;
+
 
 import java.util.List;
 
@@ -18,13 +19,7 @@ public class RequestClientFallback implements RequestClient {
     }
 
     @Override
-    public List<RequestDto> findAllRequests(List<Long> requestIds) {
-        log.warn("Fallback RequestClient response: сервис findAllRequests временно недоступен");
-        return List.of();
-    }
-
-    @Override
-    public Long countRequest(Long eventId, Request.RequestStatus status) {
+    public Long countRequest(Long eventId, RequestStatus status) {
         log.warn("Fallback RequestClient response: сервис countRequest временно недоступен");
         return 0L;
     }
@@ -36,7 +31,13 @@ public class RequestClientFallback implements RequestClient {
     }
 
     @Override
-    public List<RequestDto> findRequestByStatus(List<Long> requestId, Request.RequestStatus status) {
+    public List<RequestDto> findAllRequests(List<Long> requestIds) {
+        log.warn("Fallback RequestClient response: сервис findAllRequests временно недоступен");
+        return List.of();
+    }
+
+    @Override
+    public List<RequestDto> findRequestByStatus(List<Long> requestId, RequestStatus status) {
         log.warn("Fallback RequestClient response: сервис findRequestByStatus временно недоступен");
         return List.of();
     }

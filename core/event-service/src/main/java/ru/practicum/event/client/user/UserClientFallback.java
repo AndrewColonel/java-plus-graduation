@@ -13,7 +13,7 @@ import java.util.List;
 public class UserClientFallback implements UserClient {
     @Override
     public UserShortDto getShortUserById(Long userId) {
-        log.warn("Fallback UserClient response: сервис findById временно недоступен");
+        log.warn("Fallback UserClient response: сервис getShortUserById временно недоступен");
         return null;
     }
 

@@ -18,7 +18,8 @@ public class EventSpecification {
 
             List<Long> users = params.getUsers();
             if (users != null && !users.isEmpty() && !(users.size() == 1 && users.get(0) == 0L)) {
-                predicate = cb.and(predicate, root.get("initiator").get("id").in(users));
+//                predicate = cb.and(predicate, root.get("initiator").get("id").in(users));
+                predicate = cb.and(predicate, root.get("initiatorId").in(users));
             }
 
             if (params.getStates() != null && !params.getStates().isEmpty()) {
@@ -27,7 +28,8 @@ public class EventSpecification {
 
             List<Long> categories = params.getCategories();
             if (categories != null && !categories.isEmpty() && !(categories.size() == 1 && categories.get(0) == 0L)) {
-                predicate = cb.and(predicate, root.get("category").get("id").in(params.getCategories()));
+//                predicate = cb.and(predicate, root.get("category").get("id").in(params.getCategories()));
+                predicate = cb.and(predicate, root.get("category").in(params.getCategories()));
             }
 
             if (params.getRangeStart() != null) {
@@ -57,7 +59,8 @@ public class EventSpecification {
 
             List<Long> categories = params.getCategories();
             if (categories != null && !categories.isEmpty() && !(categories.size() == 1 && categories.get(0) == 0L)) {
-                predicate = cb.and(predicate, root.get("category").get("id").in(categories));
+//                predicate = cb.and(predicate, root.get("category").get("id").in(categories));
+                predicate = cb.and(predicate, root.get("category").in(categories));
             }
 
             if (params.getPaid() != null) {

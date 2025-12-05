@@ -12,17 +12,18 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Component
 public class CompilationMapper {
-    public static Compilation toEntity(AdminNewCompilationParamDto dto) {
-        return Compilation.builder()
-                .title(dto.getTitle())
-                .pinned(dto.getPinned())
-                .events(new HashSet<>(dto.getEvents()))
-                .build();
-    }
+//    public static Compilation toEntity(AdminNewCompilationParamDto dto) {
+//        return Compilation.builder()
+//                .title(dto.getTitle())
+//                .pinned(dto.getPinned())
+//                .events(new HashSet<>(dto.getEvents()))
+//                .build();
+//    }
 
     public static CompilationDto toDto(Compilation entity, Set<EventShortDto> events ) {
         return CompilationDto.builder()
@@ -44,13 +45,13 @@ public class CompilationMapper {
                 .build();
     }
 
-//    public static Compilation toEntity(AdminNewCompilationParamDto dto, Set<Event> events) {
-//        return Compilation.builder()
-//                .title(dto.getTitle())
-//                .pinned(dto.getPinned())
-//                .events(events)
-//                .build();
-//    }
+    public static Compilation toEntity(AdminNewCompilationParamDto dto, Set<EventShortDto> events) {
+        return Compilation.builder()
+                .title(dto.getTitle())
+                .pinned(dto.getPinned())
+                .events(events.stream().map(EventShortDto::getId).collect(Collectors.toSet()))
+                .build();
+    }
 
 
 }

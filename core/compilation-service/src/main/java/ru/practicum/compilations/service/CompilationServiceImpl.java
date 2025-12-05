@@ -52,7 +52,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (adminNewCompilationParamDto.getEvents() != null && !adminNewCompilationParamDto.getEvents().isEmpty()) {
             events = eventClient.getAllByIdIn(adminNewCompilationParamDto.getEvents());
         }
-        Compilation compilation = CompilationMapper.toEntity(adminNewCompilationParamDto);
+        Compilation compilation = CompilationMapper.toEntity(adminNewCompilationParamDto,events);
         Compilation saved = compilationRepository.save(compilation);
         return CompilationMapper.toDto(saved, events);
     }

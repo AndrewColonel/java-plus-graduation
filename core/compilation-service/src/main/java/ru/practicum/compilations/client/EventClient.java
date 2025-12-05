@@ -4,6 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.compilations.dto.ext.EventShortDto;
 
 
@@ -14,5 +15,5 @@ import java.util.Set;
 public interface EventClient {
 
     @GetMapping
-    Set<EventShortDto> getAllByIdIn(@RequestBody List<Long> eventIds);
+    Set<EventShortDto> getAllByIdIn(@RequestParam List<Long> eventIds);
 }

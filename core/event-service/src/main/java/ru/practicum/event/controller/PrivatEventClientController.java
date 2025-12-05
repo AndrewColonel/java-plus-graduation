@@ -32,7 +32,7 @@ public class PrivatEventClientController {
 
     @Loggable
     @GetMapping
-    public Set<EventShortDto> getAllByIdIn(@RequestBody List<Long> eventIds) {
+    public Set<EventShortDto> getAllByIdIn(@RequestParam List<Long> eventIds) {
         return eventService.getEventByIdIn(eventIds);
     }
 }

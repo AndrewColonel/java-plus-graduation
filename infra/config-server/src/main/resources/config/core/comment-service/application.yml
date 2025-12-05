@@ -11,6 +11,7 @@ logging:
       springframework.cloud.netflix.eureka: INFO
       springframework.web.client.RestTemplate: WARN
       org.springframework.cloud.openfeign: DEBUG
+      com.fasterxml.jackson: DEBUG
       apache.kafka: INFO
     feign.Logger: WARN
 
@@ -62,7 +63,7 @@ resilience4j:
       slidingWindowSize: 10
       failureRateThreshold: 50
   instances:
-    warehouse:
+    comment-service:
       slidingWindowSize: 10
       waitDurationInOpenState: 10000 # 10 секунд в миллисекундах
       permittedNumberOfCallsInHalfOpenState: 5

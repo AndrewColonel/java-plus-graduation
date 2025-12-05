@@ -9,7 +9,7 @@ import ru.practicum.event.dto.ext.RequestStatus;
 
 import java.util.List;
 
-@FeignClient(name = "request-service", path = "/users/{userId}/request/client", fallback = RequestClientFallback.class)
+@FeignClient(name = "request-service", path = "/requests/client", fallback = RequestClientFallback.class)
 public interface RequestClient {
 
     @GetMapping("/event/{eventId}")
@@ -23,10 +23,10 @@ public interface RequestClient {
     List<RequestDto> saveAllRequests(@RequestBody @NotNull List<RequestDto> requestDtoList);
 
     @GetMapping
-    List<RequestDto> findAllRequests(@RequestBody @NotNull List<Long> requestIds);
+    List<RequestDto> findAllRequests(@RequestParam @NotNull List<Long> requestIds);
 
     @GetMapping("/status")
-    List<RequestDto> findRequestByStatus(@RequestBody @NotNull List<Long> requestId,
+    List<RequestDto> findRequestByStatus(@RequestParam @NotNull List<Long> requestId,
                                          @RequestParam @NotNull RequestStatus status);
 
 }

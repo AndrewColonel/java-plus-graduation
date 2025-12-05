@@ -4,7 +4,6 @@ package ru.practicum.event.service;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -59,9 +58,11 @@ public class EventServiceImpl implements EventService {
         Specification<Event> spec = EventSpecification.byParams(params);
         List<Event> eventList = eventRepository.findAll(spec, pageable).getContent();
 
+        Map<Long, CategoryDto> categoryDtoMap = getCategoryDtoMap(eventList);
+        Map<Long, UserShortDto> userShortDtoMap = getUserShotDtoMap(eventList);
+
         List<EventFullDto> dtos = eventList.stream()
-                .map(event -> toEventFullDto(event, getCategoryDtoMap(eventList),
-                        getUserShotDtoMap(eventList)))
+                .map(event -> toEventFullDto(event, categoryDtoMap,userShortDtoMap))
                 .toList();
         setViewsAndConfirmedRequests(dtos);
         return dtos;
@@ -87,9 +88,11 @@ public class EventServiceImpl implements EventService {
 
         List<Event> eventList = eventRepository.findAll(spec, pageable).getContent();
 
+        Map<Long, CategoryDto> categoryDtoMap = getCategoryDtoMap(eventList);
+        Map<Long, UserShortDto> userShortDtoMap = getUserShotDtoMap(eventList);
+
         List<EventShortDto> dtos = eventList.stream()
-                .map(event -> toEventShortDto(event, getCategoryDtoMap(eventList),
-                        getUserShotDtoMap(eventList)))
+                .map(event -> toEventShortDto(event, categoryDtoMap, userShortDtoMap))
                 .toList();
 
         setViewsAndConfirmedRequests(dtos);
@@ -153,9 +156,11 @@ public class EventServiceImpl implements EventService {
             return List.of();
         }
 
+        Map<Long, CategoryDto> categoryDtoMap = getCategoryDtoMap(events);
+        Map<Long, UserShortDto> userShortDtoMap = getUserShotDtoMap(events);
+
         List<EventShortDto> dtos = events.stream()
-                .map(event -> toEventShortDto(event, getCategoryDtoMap(events),
-                        getUserShotDtoMap(events)))
+                .map(event -> toEventShortDto(event, categoryDtoMap, userShortDtoMap))
                 .toList();
 
         setViewsAndConfirmedRequests(dtos);
@@ -282,7 +287,7 @@ public class EventServiceImpl implements EventService {
             );
         }
 
-        return requestClient.getEventRequests(eventId);
+        return requestClient.getEventRequests(event.getId());
     }
 
     @Override
@@ -357,10 +362,13 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Set<EventShortDto> getEventByIdIn(List<Long> eventIds) {
-        List<Event> eventSet = eventRepository.findAllByIdIn(eventIds);
-        return eventSet.stream()
-                .map(event -> toEventShortDto(event, getCategoryDtoMap(eventSet),
-                        getUserShotDtoMap(eventSet)))
+        List<Event> eventList = eventRepository.findAllByIdIn(eventIds);
+
+        Map<Long, CategoryDto> categoryDtoMap = getCategoryDtoMap(eventList);
+        Map<Long, UserShortDto> userShortDtoMap = getUserShotDtoMap(eventList);
+
+        return eventList.stream()
+                .map(event -> toEventShortDto(event, categoryDtoMap, userShortDtoMap))
                 .collect(Collectors.toSet());
     }
 

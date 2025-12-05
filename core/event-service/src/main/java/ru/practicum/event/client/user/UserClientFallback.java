@@ -13,13 +13,17 @@ import java.util.List;
 public class UserClientFallback implements UserClient {
     @Override
     public UserShortDto getShortUserById(Long userId) {
+        log.warn("!==============================================================================|");
         log.warn("Fallback UserClient response: сервис getShortUserById временно недоступен");
+        log.warn("!==============================================================================|");
         return null;
     }
 
     @Override
     public List<UserShortDto> findByIdIn(List<Long> ids) {
+        log.warn("!==============================================================================|");
         log.warn("Fallback UserClient response: сервис findByIdIn временно недоступен");
+        log.warn("!==============================================================================|");
         return List.of();
     }
 }

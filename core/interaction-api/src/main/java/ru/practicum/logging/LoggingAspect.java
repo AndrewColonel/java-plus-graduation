@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class LoggingAspect {
 
-    @Around("@annotation(ru.yandex.practicum.commerce.iteraction.api.logging.Loggable)")
+    @Around("@annotation(ru.practicum.logging.Loggable)")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         log.info("Запрос в контроллер: {}", joinPoint.getSignature().getName());
 

@@ -14,7 +14,7 @@ import ru.practicum.requests.service.RequestService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users/{userId}/request/client")
+@RequestMapping("/requests/client")
 @RequiredArgsConstructor
 @Validated
 @Slf4j
@@ -42,13 +42,13 @@ public class PrivatRequestClientController {
 
     @Loggable
     @GetMapping
-    public List<RequestDto> findAllRequests(@RequestBody @NotNull List<Long> requestIds) {
+    public List<RequestDto> findAllRequests(@RequestParam @NotNull List<Long> requestIds) {
         return requestService.findAllRequests(requestIds);
     }
 
     @Loggable
     @GetMapping("/status")
-    public List<RequestDto> findRequestByStatus(@RequestBody @NotNull List<Long> requestId,
+    public List<RequestDto> findRequestByStatus(@RequestParam @NotNull List<Long> requestId,
                                                 @RequestParam @NotNull RequestStatus status) {
         return requestService.findRequestByStatus(requestId, status);
     }

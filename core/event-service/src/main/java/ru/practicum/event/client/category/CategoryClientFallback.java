@@ -13,13 +13,17 @@ public class CategoryClientFallback implements CategoryClient {
 
     @Override
     public CategoryDto getById(Long catId) {
-        log.warn("Fallback CategoryClient response: сервис getById временно недоступен");
+        log.warn("!==========================================================================|");
+        log.warn("| Fallback CategoryClient response: сервис getById временно недоступен |");
+        log.warn("!==========================================================================|");
         return null;
     }
 
     @Override
     public List<CategoryDto> findByIdIn(List<Long> ids) {
+        log.warn("!==========================================================================|");
         log.warn("Fallback CategoryClient response: сервис findByIdIn временно недоступен");
+        log.warn("!==========================================================================|");
         return List.of();
     }
 }

@@ -11,7 +11,9 @@ public class EventClientFallback implements EventClient {
 
     @Override
     public EventFullDto getById(Long eventId) {
+        log.warn("!==============================================================================|");
         log.warn("Fallback EventPublicClient response: сервис getById временно недоступен");
+        log.warn("!==============================================================================|");
         return null;
     }
 

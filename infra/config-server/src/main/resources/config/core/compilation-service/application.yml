@@ -1,6 +1,6 @@
 logging:
   level:
-    ru.practicum.compilation: TRACE
+    ru.practicum.compilations: TRACE
     org:
       springframework:
         orm:

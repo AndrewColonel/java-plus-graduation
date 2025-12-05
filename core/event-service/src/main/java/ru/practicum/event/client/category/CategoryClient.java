@@ -19,6 +19,6 @@ public interface CategoryClient {
     CategoryDto getById(@Positive @NotNull @PathVariable(value = "catId") Long catId);
 
     @GetMapping
-    public List<CategoryDto> findByIdIn(@RequestParam(name = "ids", required = false) List<Long> ids);
+    List<CategoryDto> findByIdIn(@RequestParam(name = "ids", required = false) List<Long> ids);
 
 }

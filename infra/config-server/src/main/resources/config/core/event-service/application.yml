@@ -1,6 +1,6 @@
 logging:
   level:
-    ru.yandex.practicum.commerce.shopping.cart: TRACE
+    ru.practicum.event: TRACE
     org:
       springframework:
         orm:
@@ -10,9 +10,9 @@ logging:
         transaction.interceptor: INFO
       springframework.cloud.netflix.eureka: INFO
       springframework.web.client.RestTemplate: WARN
+      org.springframework.cloud.openfeign: DEBUG
       apache.kafka: INFO
     feign.Logger: WARN
-
 server:
   port: 0
 #  port: 12345
@@ -39,6 +39,16 @@ spring:
 
   cloud:
     openfeign:
+      client:
+        config:
+          default:
+#           connectTimeout: 5000
+#           readTimeout: 5000
+            loggerLevel: BASIC
+      #  NONE Ничего (по умолчанию)
+      #  BASIC Только метод, URL, код ответа, время
+      #  HEADERS BASIC + заголовки запроса и ответа
+      #  FULL HEADERS + тело запроса и ответа
       circuitbreaker:
         enabled: true
         alphanumeric-ids:

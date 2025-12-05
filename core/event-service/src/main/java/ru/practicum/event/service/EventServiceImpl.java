@@ -4,6 +4,7 @@ package ru.practicum.event.service;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -170,8 +171,8 @@ public class EventServiceImpl implements EventService {
             throw new ValidationException("Event date must be at least 2 hours from now");
         }
         Event event = EventMapper.toEvent(newEventDto);
-        CategoryDto categoryDto = categoryClient.getById(event.getCategory());
-        UserShortDto userShortDto = userClient.getShortUserById(event.getInitiatorId());
+        CategoryDto categoryDto = categoryClient.getById(newEventDto.getCategory());
+        UserShortDto userShortDto = userClient.getShortUserById(userId);
 
         event.setCategory(categoryDto.getId());
         event.setInitiatorId(userShortDto.getId());

@@ -15,6 +15,7 @@ import ru.practicum.category.dto.UpdateCategoryDto;
 import ru.practicum.logging.Loggable;
 
 import java.util.List;
+import java.util.Set;
 
 
 @RestController
@@ -59,7 +60,7 @@ public class CategoryControllerAdmin {
 
     @Loggable
     @GetMapping
-    public List<CategoryDto> findByIdIn(@RequestParam(name = "ids", required = false) List<Long> ids) {
+    public Set<CategoryDto> findByIdIn(@RequestParam(name = "ids", required = false) List<Long> ids) {
         return categoryService.findCategoryByIdIn(ids);
     }
 

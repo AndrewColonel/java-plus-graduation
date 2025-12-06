@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserShortDto> findShortUserByIdIn(List<Long> ids) {
-        return userRepository.findByIdIn(ids).stream()
+        return userRepository.findAllById(ids).stream()
                 .map(UserMapper::toUserShortDto)
                 .toList();
     }

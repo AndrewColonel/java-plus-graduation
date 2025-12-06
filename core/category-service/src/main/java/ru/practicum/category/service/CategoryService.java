@@ -7,6 +7,7 @@ import ru.practicum.category.model.entity.Category;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public interface CategoryService {
     Collection<CategoryDto> getAllCategory(Integer from, Integer size);
@@ -21,6 +22,6 @@ public interface CategoryService {
 
     Category getCategory(Long catId);
 
-    List<CategoryDto> findCategoryByIdIn(List<Long> ids);
+    Set<CategoryDto> findCategoryByIdIn(List<Long> ids);
 
 }

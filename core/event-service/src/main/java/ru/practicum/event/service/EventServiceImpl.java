@@ -62,7 +62,7 @@ public class EventServiceImpl implements EventService {
         Map<Long, UserShortDto> userShortDtoMap = getUserShotDtoMap(eventList);
 
         List<EventFullDto> dtos = eventList.stream()
-                .map(event -> toEventFullDto(event, categoryDtoMap,userShortDtoMap))
+                .map(event -> toEventFullDto(event, categoryDtoMap, userShortDtoMap))
                 .toList();
         setViewsAndConfirmedRequests(dtos);
         return dtos;
@@ -260,7 +260,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getById(Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found with id: " + eventId));
-        ;
+
         CategoryDto categoryDto = categoryClient.getById(event.getCategory());
         UserShortDto userShortDto = userClient.getShortUserById(event.getInitiatorId());
         return toEventFullDto(event, categoryDto, userShortDto);
@@ -362,7 +362,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Set<EventShortDto> getEventByIdIn(List<Long> eventIds) {
-        List<Event> eventList = eventRepository.findAllByIdIn(eventIds);
+        List<Event> eventList = eventRepository.findAllById(eventIds);
 
         Map<Long, CategoryDto> categoryDtoMap = getCategoryDtoMap(eventList);
         Map<Long, UserShortDto> userShortDtoMap = getUserShotDtoMap(eventList);
@@ -379,14 +379,36 @@ public class EventServiceImpl implements EventService {
     }
 
     private Map<Long, CategoryDto> getCategoryDtoMap(List<Event> eventList) {
-        List<Long> categoryIds = eventList.stream().map(Event::getCategory).toList();
-        return categoryClient.findByIdIn(categoryIds).stream()
+        // получаем списко id категорий из списка событий
+//        List<Long> categoryIds = eventList.stream().map(Event::getCategory).toList();
+        Set<Long> categoryIds = eventList.stream().map(Event::getCategory).collect(Collectors.toSet());
+        Set<CategoryDto> categoryDtoList = categoryClient.findByIdIn(categoryIds.stream().toList());
+        Map<Long, CategoryDto> categoryDtoMap = categoryDtoList.stream()
                 .collect(Collectors.toMap(CategoryDto::getId, Function.identity()));
+
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        System.out.println("Список событий на входе: ");
+        System.out.println(eventList);
+        System.out.println("Множество ID категорий: ");
+        System.out.println(categoryIds);
+        System.out.println("Список категрий, соответсвующий множеству ID");
+        System.out.println(categoryDtoList);
+        System.out.println("Мапа - ID - Категоря");
+        System.out.println(categoryDtoMap);
+
+
+
+        return categoryDtoMap;
     }
 
     private Map<Long, UserShortDto> getUserShotDtoMap(List<Event> eventList) {
-        List<Long> categoryIds = eventList.stream().map(Event::getCategory).toList();
-        return userClient.findByIdIn(categoryIds).stream()
+        List<Long> intiatorIds = eventList.stream().map(Event::getInitiatorId).toList();
+
+
+
+
+
+        return userClient.findByIdIn(intiatorIds).stream()
                 .collect(Collectors.toMap(UserShortDto::getId, Function.identity()));
     }
 

@@ -13,6 +13,7 @@ import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.UpdateEventUserRequest;
+import ru.practicum.logging.Loggable;
 
 import java.util.List;
 
@@ -76,12 +77,14 @@ public class PrivateEventController {
         return dto;
     }
 
+    @Loggable
     @GetMapping("/{eventId}/requests")
     public List<RequestDto> getUsersEventRequests(@PathVariable Long userId,
                                                   @PathVariable Long eventId) {
         return eventService.getEventParticipants(userId, eventId);
     }
 
+    @Loggable
     @PatchMapping("/{eventId}/requests")
     public EventRequestStatusUpdateResult changeRequestStatus(@PathVariable Long userId,
                                                               @PathVariable Long eventId,

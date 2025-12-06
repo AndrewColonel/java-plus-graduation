@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.event.dto.ext.CategoryDto;
 
 import java.util.List;
+import java.util.Set;
 
 
 @Slf4j
@@ -20,10 +21,10 @@ public class CategoryClientFallback implements CategoryClient {
     }
 
     @Override
-    public List<CategoryDto> findByIdIn(List<Long> ids) {
+    public Set<CategoryDto> findByIdIn(List<Long> ids) {
         log.warn("!==========================================================================|");
         log.warn("Fallback CategoryClient response: сервис findByIdIn временно недоступен");
         log.warn("!==========================================================================|");
-        return List.of();
+        return Set.of();
     }
 }

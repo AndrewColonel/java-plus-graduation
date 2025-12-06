@@ -13,6 +13,8 @@ import ru.practicum.exception.NotFoundException;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ru.practicum.category.model.CategoryMapper.toCategory;
 import static ru.practicum.category.model.CategoryMapper.toCategoryDto;
@@ -56,10 +58,10 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> findCategoryByIdIn(List<Long> ids) {
+    public Set<CategoryDto> findCategoryByIdIn(List<Long> ids) {
         return categoryRepository.findByIdIn(ids).stream()
                 .map(CategoryMapper::toCategoryDto)
-                .toList();
+                .collect(Collectors.toSet());
     }
 
     // вспомогательный метод

@@ -10,15 +10,16 @@ import ru.practicum.event.dto.ext.CategoryDto;
 
 
 import java.util.List;
+import java.util.Set;
 
 
-@FeignClient(name = "category-service", path = "/categories", fallback = CategoryClientFallback.class)
+@FeignClient(name = "category-service", fallback = CategoryClientFallback.class)
 public interface CategoryClient {
 
-    @GetMapping("/{catId}")
+    @GetMapping("/categories/{catId}")
     CategoryDto getById(@Positive @NotNull @PathVariable(value = "catId") Long catId);
 
-    @GetMapping
-    List<CategoryDto> findByIdIn(@RequestParam(name = "ids", required = false) List<Long> ids);
+    @GetMapping("/admin/categories")
+    Set<CategoryDto> findByIdIn(@RequestParam(name = "ids", required = false) List<Long> ids);
 
 }

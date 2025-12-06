@@ -2,7 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -10,17 +9,16 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <name>Explore With Me</name>
+    <groupId>ru.practicum</groupId>
+    <artifactId>explore-with-me</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
     <modules>
         <module>core</module>
         <module>infra</module>
         <module>stats</module>
     </modules>
-
-    <groupId>ru.practicum</groupId>
-    <artifactId>explore-with-me</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <packaging>pom</packaging>
 
     <properties>
         <java.version>21</java.version>
@@ -35,17 +33,12 @@
 
         <spring-cloud-dependencies.version>2023.0.3</spring-cloud-dependencies.version>
 
-
         <!--       Plugins       -->
 <!--        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>-->
 <!--        <avro-maven-plugin.version>${avro.version}</avro-maven-plugin.version>-->
 <!--        <protobuf-plugin.version>2.4.0</protobuf-plugin.version>-->
 
-
-
     </properties>
-
-
 
     <dependencyManagement>
         <dependencies>
@@ -57,9 +50,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
-
-
 
 <!--            <dependency>-->
 <!--                <groupId>org.apache.avro</groupId>-->
@@ -109,14 +99,16 @@
     </dependencyManagement>
 
 
-
-
-
-
-
     <build>
         <pluginManagement>
             <plugins>
+
+<!--                <plugin>-->
+<!--                    <groupId>org.apache.maven.plugins</groupId>-->
+<!--                    <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                    <version>${maven-compiler-plugin.version}</version>-->
+<!--                </plugin>-->
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>

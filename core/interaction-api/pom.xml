@@ -10,5 +10,6 @@
     </parent>
 
     <artifactId>interaction-api</artifactId>
+    <packaging>jar</packaging>
 
 </project>

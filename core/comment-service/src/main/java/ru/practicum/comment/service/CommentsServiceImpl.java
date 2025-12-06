@@ -39,8 +39,9 @@ public class CommentsServiceImpl implements CommentsService {
         List<Comment> commentList = commentsRepository.findByEventIdAndStatusOrderByCreateTimeDesc(event.getId(),
                 CommentStatus.MODERATED_OPEN, param.toPage());
         // для публичного показа допускаются комментарии после модерации администртором
+        Map<Long,UserShortDto> userShortDtoMap = getUserShortDtoMap(commentList);
         return commentList.stream()
-                .map(c -> toDto(c, getUserShortDtoMap(commentList)))
+                .map(c -> toDto(c, userShortDtoMap))
                 .toList();
     }
 
@@ -71,9 +72,9 @@ public class CommentsServiceImpl implements CommentsService {
     public List<CommentDto> getCommentPrivate(GetCommentsParam param, Long userId) {
         List<Comment> commentList = commentsRepository.findByEventIdAndCreatorIdOrderByCreateTimeDesc(param.getEventId(),
                 userId, param.toPage());
-
+        Map<Long,UserShortDto> userShortDtoMap = getUserShortDtoMap(commentList);
         return commentList.stream()
-                .map(c -> toDto(c, getUserShortDtoMap(commentList)))
+                .map(c -> toDto(c, userShortDtoMap))
                 .toList();
     }
 
@@ -90,8 +91,9 @@ public class CommentsServiceImpl implements CommentsService {
     public List<CommentDto> searchCommentAdmin(SearchCommentParam param, CommentStatus status) {
         Specification<Comment> spec = CommentSpecification.byParams(param, status);
         List<Comment> commentList = commentsRepository.findAll(spec, param.toPage()).getContent();
+        Map<Long,UserShortDto> userShortDtoMap = getUserShortDtoMap(commentList);
         return commentList.stream()
-                .map(c -> toDto(c, getUserShortDtoMap(commentList)))
+                .map(c -> toDto(c, userShortDtoMap))
                 .toList();
     }
 

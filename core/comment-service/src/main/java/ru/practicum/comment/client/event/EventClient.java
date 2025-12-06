@@ -9,7 +9,7 @@ import ru.practicum.comment.dto.ext.EventShortDto;
 @FeignClient(name = "event-service", path = "/events/client", fallback = EventClientFallback.class)
 public interface EventClient {
 
-    @GetMapping("/{eventId}")
+    @GetMapping("/short/{eventId}")
     EventShortDto getShortEventById(@PathVariable Long eventId);
 
 }

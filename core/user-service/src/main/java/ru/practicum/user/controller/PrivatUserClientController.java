@@ -20,13 +20,6 @@ public class PrivatUserClientController {
 
     private final UserService userService;
 
-
-//    @Loggable
-//    @GetMapping("/{userId}")
-//    public UserDto getUserById(@Positive @PathVariable("userId") Long userId) {
-//        return userService.findUserById(userId);
-//    }
-
     @Loggable
     @GetMapping("/{userId}")
     public UserShortDto getShortUserById(@Positive @PathVariable("userId") Long userId) {

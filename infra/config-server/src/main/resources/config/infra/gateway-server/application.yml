@@ -31,35 +31,27 @@ spring:
           predicates:
             - Path=/admin/categories/**, /categories/**
 
+        - id: comment-service_route
+          uri: lb://comment-service
+          predicates:
+            - Path=/admin/events/{eventId}/comments/**, /admin/comments/**, /users/{userId}/events/{eventId}/comments/**, /events/{eventId}/comments/**
 
         - id: event-service_route
           uri: lb://event-service
           predicates:
             - Path=/users/{userId}/events/**, /admin/events/**, /events/**
 
-
         - id: compilation-service_route
           uri: lb://compilation-service
           predicates:
             - Path=/compilations/**, /admin/compilations/**
-
-
 
         - id: user-service_route
           uri: lb://user-service
           predicates:
             - Path=/admin/users/**
 
-
-
         - id: request-service_route
           uri: lb://request-service
           predicates:
             - Path=/users/{userId}/requests/**
-
-
-        - id: comment-service_route
-          uri: lb://comment-service
-          predicates:
-            - Path=/admin/events/{eventId}/comments/**, /admin/comments/**, /users/{userId}/events/{eventId}/comments/**, /events/{eventId}/comments/**
-

@@ -312,7 +312,7 @@ public class EventServiceImpl implements EventService {
             if (!r.getEvent().equals(eventId)) {
                 throw new ValidationException("Request " + r.getId() + " does not belong to event " + eventId);
             }
-            if (r.getStatus().equals(RequestStatus.PENDING.toString())) {
+            if (!r.getStatus().equals(RequestStatus.PENDING.toString())) {
                 throw new ConflictException("Request must have status PENDING");
             }
         }
@@ -386,15 +386,15 @@ public class EventServiceImpl implements EventService {
         Map<Long, CategoryDto> categoryDtoMap = categoryDtoList.stream()
                 .collect(Collectors.toMap(CategoryDto::getId, Function.identity()));
 
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        System.out.println("Список событий на входе: ");
-        System.out.println(eventList);
-        System.out.println("Множество ID категорий: ");
-        System.out.println(categoryIds);
-        System.out.println("Список категрий, соответсвующий множеству ID");
-        System.out.println(categoryDtoList);
-        System.out.println("Мапа - ID - Категоря");
-        System.out.println(categoryDtoMap);
+//        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//        System.out.println("Список событий на входе: ");
+//        System.out.println(eventList);
+//        System.out.println("Множество ID категорий: ");
+//        System.out.println(categoryIds);
+//        System.out.println("Список категрий, соответсвующий множеству ID");
+//        System.out.println(categoryDtoList);
+//        System.out.println("Мапа - ID - Категоря");
+//        System.out.println(categoryDtoMap);
 
 
 

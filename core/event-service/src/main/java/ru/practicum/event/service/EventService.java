@@ -33,6 +33,8 @@ public interface EventService {
 
     EventShortDto getShortEventById(Long eventId);
 
+    List<EventShortDto> getShortEventByCategoryId(Long eventId);
+
     List<RequestDto> getEventParticipants(Long userId, Long eventId);
 
     EventRequestStatusUpdateResult changeRequestStatus(Long userId, Long eventId, EventRequestStatusUpdateRequest req);

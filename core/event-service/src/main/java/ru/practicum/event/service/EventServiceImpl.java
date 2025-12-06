@@ -278,6 +278,18 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public List<EventShortDto> getShortEventByCategoryId(Long categoryId) {
+        List<Event> eventList = eventRepository.findByCategory(categoryId);
+
+        Map<Long, CategoryDto> categoryDtoMap = getCategoryDtoMap(eventList);
+        Map<Long, UserShortDto> userShortDtoMap = getUserShotDtoMap(eventList);
+
+        return eventList.stream()
+                .map(event -> toEventShortDto(event, categoryDtoMap, userShortDtoMap))
+                .toList();
+    }
+
+    @Override
     public List<RequestDto> getEventParticipants(Long userId, Long eventId) {
         Event event = getEventById(eventId);
 

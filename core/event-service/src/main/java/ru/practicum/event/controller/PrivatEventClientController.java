@@ -35,4 +35,11 @@ public class PrivatEventClientController {
     public Set<EventShortDto> getAllByIdIn(@RequestParam List<Long> eventIds) {
         return eventService.getEventByIdIn(eventIds);
     }
+
+    @Loggable
+    @GetMapping("/category/{categoryId}")
+    public List<EventShortDto> getShortEventByCategoryId(@PathVariable Long categoryId) {
+        return eventService.getShortEventByCategoryId(categoryId);
+    }
+
 }

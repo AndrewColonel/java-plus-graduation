@@ -3,12 +3,14 @@ package ru.practicum.category.service;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import ru.practicum.category.client.event.EventClient;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.dto.UpdateCategoryDto;
 import ru.practicum.category.model.entity.Category;
 import ru.practicum.category.model.CategoryMapper;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 
 import java.util.Collection;
@@ -24,6 +26,8 @@ import static ru.practicum.category.model.CategoryMapper.toCategoryDto;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+
+    private final EventClient eventClient;
 
     @Override
     public Collection<CategoryDto> getAllCategory(Integer from, Integer size) {
@@ -54,6 +58,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void deleteCategory(Long catId) {
         Category category = getCategory(catId);
+        if (!eventClient.getShortEventByCategoryId(catId).isEmpty()) {
+            throw new ConflictException("Категория имеет привязвнные события");
+        }
         categoryRepository.delete(category);
     }
 

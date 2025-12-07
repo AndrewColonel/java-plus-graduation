@@ -43,16 +43,50 @@ docker run -p 9090:8080 -e API_URL=https://raw.githubusercontent.com/yandex-prak
 - Spring Cloud Eureka — сервис регистрации и обнаружения;
 - Spring Cloud Gateway — API-шлюз для маршрутизации запросов.
 
-Сервис Discovery использует стандартный порт 8761 - http://localhost:8761/
+**Сервис Discovery** использует стандартный порт 8761 - http://localhost:8761/
 Все остальные сервисы получают динамические настройки сетевого порта.
 
-Сервис Config предоставляет настройки для микро сервисов, размещенные в ресурсных папках
+**Сервис Config** предоставляет настройки для микро сервисов, размещенные в ресурсных папках
 ```
 searchLocations:  
   - classpath:config/core/{application}  
   - classpath:config/stats/{application}  
   - classpath:config/infra/{application}
 ```
+
+**Spring Cloud Gateway** использует статический порт 8080 и предоставляет следующие эндпоинты:
+
+**category-service** (`lb://category-service`)
+
+- `/admin/categories/**` → `/categories/**`
+- `/categories/**` → `/categories/**`
+
+**comment-service** (`lb://comment-service`)
+
+- `/admin/events/{eventId}/comments/**` → `/events/{eventId}/comments/**`
+- `/admin/comments/**` → `/comments/**`
+- `/users/{userId}/events/{eventId}/comments/**` → `/users/{userId}/events/{eventId}/comments/**`
+- `/events/{eventId}/comments/**` → `/events/{eventId}/comments/**`
+
+**event-service** (`lb://event-service`)
+
+- `/users/{userId}/events/**` → `/users/{userId}/events/**`
+- `/admin/events/**` → `/events/**`
+- `/events/**` → `/events/**`
+
+**compilation-service** (`lb://compilation-service`)
+
+- `/compilations/**` → `/compilations/**`
+- `/admin/compilations/**` → `/compilations/**`
+
+**user-service** (`lb://user-service`)
+
+- `/admin/users/**` → `/users/**`
+
+**request-service** (`lb://request-service`)
+
+- `/users/{userId}/requests/**` → `/users/{userId}/requests/**`
+
 
 
 ## Микросервисы
@@ -98,36 +132,81 @@ CREATE DATABASE ewm_location;
 
 ```
 
-
 ## Feign-клиент
 
 Для реализации взаимодействия микросервисов срезе HTTP использован механизм экосистемы Spring Cloud.
 
 Для внедрения feign клиентов был выбран подход без общих интерфейсов и с дублированием  dto.
 
-#### Взаимодействие микросервисов:
+## Взаимодействие микросервисов с использованием feign клиента:
+
+### **Сервис`event-service`**
+##### **Сервис**: `category-service`
+- **Эндпоинты и методы**:
+    - `GET /categories/{catId}` → получение категории по ID
+    - `GET /admin/categories?ids=...` → получение списка категорий по переданным ID
+- **Сущности**:
+    - `CategoryDto`
+##### **Сервис**: `user-service`
+- **Эндпоинты и методы**:
+    - `GET /admin/users/client/{userId}` — получение краткой информации о пользователе по ID
+    - `GET /admin/users/client?ids=...` — получение списка кратких данных о пользователях по ID
+- **Сущности**:
+    - `UserShortDto`
+    - `user-service` получение `UserShortDto`
+    - `request-service` получение `RequestDto`
+    - `Stat-server` вызов методов учета статистики
+##### **Сервис**: `request-service`
+- **Эндпоинты и методы**:
+    - `GET /requests/client/event/{eventId}` — получение всех запросов на участие в событии
+    - `GET /requests/client/event/{eventId}/status` — подсчёт количества запросов на событие с указанным статусом
+    - `POST /requests/client` — создание нескольких запросов на участие
+    - `GET /requests/client?requestIds=...` — получение запросов по списку ID
+    - `GET /requests/client/status?requestId=...&status=...` — получение запросов по списку ID и статусу
+- **Сущности**:
+    - `RequestDto`
+    - `RequestStatus` (перечисление, enum)
+##### **Сервис**: - `Stat-server`
 
 
-`event-service`
-- `category-service` 
-- `user-service`
-- `request-service`
-- `Stat-server`
+### **Сервис**: `request-service`
+##### **Сервис**: `event-service`
+**Эндпоинты и методы**:    
+- `GET /events/client/{eventId}` — получение полной информации о событии по ID
+- **Сущности**:
+    - `EventFullDto`
+- **Сервис**: `user-service`
+- **Эндпоинты и методы**:
+    - `GET /admin/users/client/{userId}` — получение краткой информации о пользователе по ID
+    - `GET /admin/users/client?ids=...` — получение списка кратких данных о пользователях по переданным ID
+- **Сущности**:
+    - `UserShortDto`
 
-`request-service`
-- `event-service`
-- `user-service`
+### **Сервис**: `category-service`
+##### **Сервис**: `event-service`
+- **Базовый путь**: `/events/client`
+- **Эндпоинты и методы**:
+    - `GET /events/client/category/{categoryId}` — получение списка кратких данных о событиях по ID категории
+- **Сущности**:
+    - `EventShortDto`
+### **Сервис**: `compilation-service`
+##### **Сервис**: `event-service`
+- **Эндпоинты и методы**:
+    - `GET /events/client?eventIds=...` — получение набора кратких данных о событиях по списку ID
+- **Сущности**:
+    - `EventShortDto`
 
-`category-service`
-- `event-service`
-
-`compilation-service`
-- `event-service`
-
-`comment-service`
-- `event-service`
-- `user-service`
-
-
+### **Сервис**: `comment-service`
+##### **Сервис**: `event-service`
+- **Эндпоинты и методы**:
+    - `GET /events/client/short/{eventId}` — получение краткой информации о событии по ID
+- **Сущности**:
+    - `EventShortDto`
+##### **Сервис**: `user-service`
+- **Эндпоинты и методы**:
+    - `GET /admin/users/client/{userId}` — получение краткой информации о пользователе по ID
+    - `GET /admin/users/client?ids=...` — получение списка кратких данных о пользователях по переданным ID
+- **Сущности**:
+    - `UserShortDto`
 
 

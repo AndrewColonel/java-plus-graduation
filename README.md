@@ -109,7 +109,7 @@ CREATE DATABASE ewm_location;
 
 
 `event-service`
-- `category-service`
+- `category-service` 
 - `user-service`
 - `request-service`
 - `Stat-server`

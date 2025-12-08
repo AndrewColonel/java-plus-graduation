@@ -1,6 +1,6 @@
 logging:
   level:
-    ru.practicum.user: TRACE
+    ru.practicum.collector: TRACE
     org:
       springframework:
         orm:
@@ -18,7 +18,8 @@ logging:
 
 grpc:
   server:
-    port: 59091
+    port: 0
+#    port: 59091
 
 collector:
   kafka:
@@ -27,7 +28,6 @@ collector:
       properties:
         bootstrap.servers: ${collector.kafka.bootstrap-servers}
         key.serializer: org.apache.kafka.common.serialization.StringSerializer
-        value.serializer: ru.yandex.practicum.kafka.serializer.GeneralAvroSerializer
+        value.serializer: ru.practicum.kafka.serializer.GeneralAvroSerializer
         linger.ms: 0
-      hubtopic: "telemetry.hubs.v1"
-      sensortopic: "telemetry.sensors.v1"
+      useractiontopic: "stats.user-actions.v1"

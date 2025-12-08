@@ -1,6 +1,6 @@
 @namespace("ru.practicum.ewm.stats.avro")
 
-protocol UserActionProtocol {
+protocol UserAction {
 
     enum ActionTypeAvro {
         VIEW,

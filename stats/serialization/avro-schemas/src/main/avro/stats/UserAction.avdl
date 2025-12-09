@@ -3,14 +3,14 @@
 protocol UserActionProtocol {
 
     enum ActionTypeAvro {
-        VIEW,
-        REGISTER,
-        LIKE
+        ACTION_VIEW,
+        ACTION_REGISTER,
+        ACTION_LIKE
     }
 
     record UserActionAvro {
-        int userId;
-        int eventId;
+        long userId;
+        long eventId;
         ActionTypeAvro actionType;
         timestamp_ms timestamp;
     }

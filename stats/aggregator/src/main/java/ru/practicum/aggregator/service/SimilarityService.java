@@ -6,5 +6,5 @@ import ru.practicum.ewm.stats.avro.UserActionAvro;
 import java.util.Optional;
 
 public interface SimilarityService {
-    Optional<EventSimilarityAvro> similarityCompute(UserActionAvro userAction);
+    Optional<EventSimilarityAvro> similarityProcessing(UserActionAvro userAction);
 }

@@ -19,15 +19,14 @@ logging:
 grpc:
   server:
     port: 0
-#    port: 59091
 
 collector:
   kafka:
-    bootstrap-servers: "localhost:9092"
+    bootstrap-servers: localhost:9092
     producerconfig:
       properties:
-        bootstrap.servers: ${collector.kafka.bootstrap-servers}
-        key.serializer: org.apache.kafka.common.serialization.StringSerializer
-        value.serializer: ru.practicum.kafka.serializer.GeneralAvroSerializer
-        linger.ms: 0
+        bootstrap.servers: "${collector.kafka.bootstrap-servers}"
+        key.serializer: "org.apache.kafka.common.serialization.LongSerializer"
+#        value.serializer: "org.apache.kafka.common.serialization.ByteArraySerializer"
+        value.serializer: "ru.practicum.kafka.serializer.GeneralAvroSerializer"
       useractiontopic: "stats.user-actions.v1"

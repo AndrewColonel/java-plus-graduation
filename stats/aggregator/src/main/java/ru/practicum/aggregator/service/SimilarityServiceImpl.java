@@ -14,25 +14,42 @@ import java.util.*;
 @AllArgsConstructor
 public class SimilarityServiceImpl implements SimilarityService {
 
-    @Value(value = "${agregator.action.weight.view}")
-    private static double ACTION_VIEW_WEIGHT;
-    @Value(value = "${agregator.action.weight.register}")
-    private static double ACTION_REGISTER_WEIGHT;
-    @Value(value = "${agregator.action.weight.like}")
-    private static double ACTION_LIKE_WEIGHT;
+    @Value(value = "${aggregator.action.weight.view}")
+    private Double ACTION_WEIGHT_VIEW;
+    @Value(value = "${aggregator.action.weight.registered}")
+    private Double ACTION_WEIGHT_REGISTER;
+    @Value(value = "${aggregator.action.weight.like}")
+    private Double ACTION_WEIGHT_LIKE;
 
+
+
+
+    // матрица весов Map<Event, Map<User, Weight>>
     private final Map<Long, Map<Long, Double>> actionMatrix = new HashMap<>();
 
     @Override
     public Optional<EventSimilarityAvro> similarityProcessing(UserActionAvro userActionAvro) {
 
+        System.out.println(ACTION_WEIGHT_VIEW);
+        System.out.println(ACTION_WEIGHT_REGISTER);
+        System.out.println(ACTION_WEIGHT_LIKE);
+
+
+
+
         // опрееделим вес для каждого типа действий пользователея
         Double actionWeight = switch (userActionAvro.getActionType()) {
-            case ACTION_VIEW -> ACTION_VIEW_WEIGHT;
-            case ACTION_REGISTER -> ACTION_REGISTER_WEIGHT;
-            case ACTION_LIKE -> ACTION_LIKE_WEIGHT;
+            case ACTION_VIEW -> ACTION_WEIGHT_VIEW;
+            case ACTION_REGISTER -> ACTION_WEIGHT_REGISTER;
+            case ACTION_LIKE -> ACTION_WEIGHT_LIKE;
         };
+
+        System.out.println("--------actionWeight----------------------");
+        System.out.println(actionWeight);
+
+
         // собираем матрицу весов действий пользователей c мероприятиями в виде отображения.
+        // Map<Event, Map<User, Weight>>
         if (actionMatrix.containsKey(userActionAvro.getEventId())) {
             Map<Long, Double> userWeightMap = actionMatrix.get(userActionAvro.getEventId());
             // если событие уже было в матрице, проверяю действия пользователя
@@ -54,6 +71,16 @@ public class SimilarityServiceImpl implements SimilarityService {
             userWeightMap.put(userActionAvro.getUserId(), actionWeight);
             actionMatrix.put(userActionAvro.getEventId(), userWeightMap);
         }
+
+
+        System.out.println(actionMatrix);
+
+
+
+
+
+
+
 
         return Optional.empty();
     }

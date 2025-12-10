@@ -139,8 +139,6 @@ public class AggregationStarter implements Runnable {
             String topicProducer) throws InterruptedException {
         log.info("<<< Получено сообщение топика = {}, партиция = {}, смещение = {}, значение: {}\n",
                 record.topic(), record.partition(), record.offset(), record.value());
-
-
         if (record.value() instanceof UserActionAvro userActionAvro) {
             Optional<EventSimilarityAvro> optionalEventSimilarityAvro = similarityService.similarityProcessing(userActionAvro);
             // если снапшот сформирован, то его надо отправить в брокер
@@ -154,11 +152,5 @@ public class AggregationStarter implements Runnable {
                         log.info("<--- Сходство не было расчитано --->");
                     });
         }
-
-
-
-
-
     }
-
 }

@@ -1,6 +1,6 @@
 package ru.practicum.aggregator.service;
 
-import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,15 +11,15 @@ import java.util.*;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@Getter
 public class SimilarityServiceImpl implements SimilarityService {
 
     @Value(value = "${aggregator.action.weight.view}")
-    private Double ACTION_WEIGHT_VIEW;
+    private Double actionWeightView;
     @Value(value = "${aggregator.action.weight.registered}")
-    private Double ACTION_WEIGHT_REGISTER;
+    private Double actionWeightRegister;
     @Value(value = "${aggregator.action.weight.like}")
-    private Double ACTION_WEIGHT_LIKE;
+    private Double actionWeightLike;
 
 
 
@@ -30,18 +30,18 @@ public class SimilarityServiceImpl implements SimilarityService {
     @Override
     public Optional<EventSimilarityAvro> similarityProcessing(UserActionAvro userActionAvro) {
 
-        System.out.println(ACTION_WEIGHT_VIEW);
-        System.out.println(ACTION_WEIGHT_REGISTER);
-        System.out.println(ACTION_WEIGHT_LIKE);
+        System.out.println(actionWeightView);
+        System.out.println(actionWeightRegister);
+        System.out.println(actionWeightLike);
 
 
 
 
         // опрееделим вес для каждого типа действий пользователея
         Double actionWeight = switch (userActionAvro.getActionType()) {
-            case ACTION_VIEW -> ACTION_WEIGHT_VIEW;
-            case ACTION_REGISTER -> ACTION_WEIGHT_REGISTER;
-            case ACTION_LIKE -> ACTION_WEIGHT_LIKE;
+            case ACTION_VIEW -> actionWeightView;
+            case ACTION_REGISTER -> actionWeightRegister;
+            case ACTION_LIKE -> actionWeightLike;
         };
 
         System.out.println("--------actionWeight----------------------");

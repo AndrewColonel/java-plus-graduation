@@ -26,7 +26,7 @@ import static ru.practicum.collector.common.EnumMapper.toAvroEnum;
 @AllArgsConstructor
 public class UserActionHandlerImpl implements UserActionHandler {
 
-    private final KafkaCollectorProducer kafkaProducer;
+    private final KafkaCollectorProducer collectorProducer;
 
     @Override
     public void handle(UserActionProto userActionProto) {
@@ -41,8 +41,8 @@ public class UserActionHandlerImpl implements UserActionHandler {
 
                 .build();
 
-        Producer<String, SpecificRecordBase> producer = kafkaProducer.getProducer();
-        String topic = kafkaProducer.getTopic();
+        Producer<String, SpecificRecordBase> producer = collectorProducer.getProducer();
+        String topic = collectorProducer.getTopic();
         ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(topic, userActionAvro);
         log.info("Объект Avro для отправки в брокер {} в топик {}", userActionAvro, topic);
 

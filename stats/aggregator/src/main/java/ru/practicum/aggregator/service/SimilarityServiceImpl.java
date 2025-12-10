@@ -22,7 +22,6 @@ public class SimilarityServiceImpl implements SimilarityService {
     @Value(value = "${aggregator.action.weight.like}")
     private Double actionWeightLike;
 
-
     // матрица весов Map<Event, Map<User, Weight>>
     private final Map<Long, Map<Long, Double>> actionMatrix = new HashMap<>();
 
@@ -70,7 +69,7 @@ public class SimilarityServiceImpl implements SimilarityService {
             log.trace("|||-- такого события {} еще не было в матрице",userActionAvro.getEventId());
 
         }
-        log.trace("|||-- текущее сотсояние матрицы состояний {}", actionMatrix);
+        log.trace("|||-- текущее состояние матрицы состояний {}", actionMatrix);
 
 
 

@@ -14,6 +14,7 @@ import java.util.*;
 @Getter
 public class SimilarityServiceImpl implements SimilarityService {
 
+    // считываем из конфигурации параметры веса каждого дейсвтия пользователя
     @Value(value = "${aggregator.action.weight.view}")
     private Double actionWeightView;
     @Value(value = "${aggregator.action.weight.registered}")
@@ -22,20 +23,11 @@ public class SimilarityServiceImpl implements SimilarityService {
     private Double actionWeightLike;
 
 
-
-
     // матрица весов Map<Event, Map<User, Weight>>
     private final Map<Long, Map<Long, Double>> actionMatrix = new HashMap<>();
 
     @Override
     public Optional<EventSimilarityAvro> similarityProcessing(UserActionAvro userActionAvro) {
-
-        System.out.println(actionWeightView);
-        System.out.println(actionWeightRegister);
-        System.out.println(actionWeightLike);
-
-
-
 
         // опрееделим вес для каждого типа действий пользователея
         Double actionWeight = switch (userActionAvro.getActionType()) {
@@ -43,10 +35,8 @@ public class SimilarityServiceImpl implements SimilarityService {
             case ACTION_REGISTER -> actionWeightRegister;
             case ACTION_LIKE -> actionWeightLike;
         };
-
-        System.out.println("--------actionWeight----------------------");
-        System.out.println(actionWeight);
-
+        log.trace("|||-- принято в обработку: {}", userActionAvro);
+        log.trace("|||-- вес дейсвия {} равен: {}", userActionAvro.getActionType(), actionWeight);
 
         // собираем матрицу весов действий пользователей c мероприятиями в виде отображения.
         // Map<Event, Map<User, Weight>>
@@ -60,22 +50,27 @@ public class SimilarityServiceImpl implements SimilarityService {
                             (k, oldWeight) -> Math.max(oldWeight, actionWeight));
                 }
 
+                log.trace("|||-- такой пользователь {} уже взаимодейстовал с мероприятием {}",
+                        userActionAvro.getUserId(),userActionAvro.getEventId());
+                log.trace("|||-- новый максимальный вес действия: {}",
+                        userWeightMap.get(userActionAvro.getUserId()));
             } else {
                 // если это первое действие пользователя с мероприятием - записываю его в отображение
                 userWeightMap.put(userActionAvro.getUserId(), actionWeight);
+                log.trace("|||-- такой пользователь {} еще не взаимодейстовал с мероприятием {}",
+                        userActionAvro.getUserId(),userActionAvro.getEventId());
+                log.trace("|||-- вес действия: {}",
+                        userWeightMap.get(userActionAvro.getUserId()));
             }
-
         } else {
             // события еще не было в матрице
             Map<Long, Double> userWeightMap = new HashMap<>();
             userWeightMap.put(userActionAvro.getUserId(), actionWeight);
             actionMatrix.put(userActionAvro.getEventId(), userWeightMap);
+            log.trace("|||-- такого события {} еще не было в матрице",userActionAvro.getEventId());
+
         }
-
-
-        System.out.println(actionMatrix);
-
-
+        log.trace("|||-- текущее сотсояние матрицы состояний {}", actionMatrix);
 
 
 

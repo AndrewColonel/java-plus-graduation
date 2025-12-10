@@ -19,6 +19,6 @@ public class KafkaConfig {
     @AllArgsConstructor
     public static class ProducerConfig {
         private Properties properties;
-        private String useractiontopic;
+        private String topic;
     }
  }

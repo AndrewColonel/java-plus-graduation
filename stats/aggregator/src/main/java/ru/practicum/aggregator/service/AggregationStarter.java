@@ -83,7 +83,7 @@ public class AggregationStarter implements Runnable {
                 int count = 0;
                 for (ConsumerRecord<String, SpecificRecordBase> record : records) {
                     // обрабатываем очередную запись
-                    handleRecord(record, producer, topicProducer);
+                        handleRecord(record, producer, topicProducer);
                     // фиксируем оффсеты обработанных записей, каждые 10 штук
                     manageOffsets(record, count, consumer);
                     count++;

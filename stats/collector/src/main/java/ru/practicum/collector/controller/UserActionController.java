@@ -23,7 +23,7 @@ public class UserActionController extends UserActionControllerGrpc.UserActionCon
     @Override
     public void collectUserAction(UserActionProto request, StreamObserver<Empty> responseObserver) {
         try {
-            log.info("принят proto {}", request);
+            log.info("принят UserActionProto: {}", request);
             userActionHandler.handle(request);
         } catch (Exception e) {
             responseObserver.onError(new StatusRuntimeException(

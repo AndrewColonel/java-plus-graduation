@@ -26,7 +26,7 @@ public class KafkaProducer {
     }
 
     public String getUserActionTopic() {
-        return producerConfig.getUseractiontopic();
+        return producerConfig.getTopic();
     }
 
     public void closeProducer() {

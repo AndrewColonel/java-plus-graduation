@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 
 
-import ru.practicum.collector.common.KafkaProducer;
+import ru.practicum.collector.common.KafkaCollectorProducer;
 import ru.practicum.ewm.stats.avro.ActionTypeAvro;
 import ru.practicum.ewm.stats.avro.UserActionAvro;
 import ru.practicum.grpc.stats.proto.UserActionProto;
@@ -26,7 +26,7 @@ import static ru.practicum.collector.common.EnumMapper.toAvroEnum;
 @AllArgsConstructor
 public class UserActionHandlerImpl implements UserActionHandler {
 
-    private final KafkaProducer kafkaProducer;
+    private final KafkaCollectorProducer kafkaProducer;
 
     @Override
     public void handle(UserActionProto userActionProto) {
@@ -42,7 +42,7 @@ public class UserActionHandlerImpl implements UserActionHandler {
                 .build();
 
         Producer<String, SpecificRecordBase> producer = kafkaProducer.getProducer();
-        String topic = kafkaProducer.getUserActionTopic();
+        String topic = kafkaProducer.getTopic();
         ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(topic, userActionAvro);
         log.info("Объект Avro для отправки в брокер {} в топик {}", userActionAvro, topic);
 

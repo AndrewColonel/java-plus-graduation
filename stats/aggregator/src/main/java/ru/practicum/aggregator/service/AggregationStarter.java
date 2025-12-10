@@ -25,7 +25,6 @@ import java.util.*;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class AggregationStarter implements Runnable {
 
     @Value(value = "${aggregator.kafka.offset-fix-count}")

@@ -1,6 +1,7 @@
 package ru.practicum.collector.common;
 
 import org.apache.avro.specific.SpecificRecordBase;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -8,24 +9,25 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 @Component
-public class KafkaProducer {
+public class KafkaCollectorProducer {
 
-    private final KafkaConfig.ProducerConfig producerConfig;
     private Producer<String, SpecificRecordBase> producer;
+    private final KafkaConfig.ProducerConfig producerConfig;
+
 
     @Autowired
-    public KafkaProducer(KafkaConfig kafkaConfig) {
+    public KafkaCollectorProducer(KafkaConfig kafkaConfig) {
         this.producerConfig = kafkaConfig.getProducerConfig();
     }
 
     public Producer<String, SpecificRecordBase> getProducer() {
         if (Objects.isNull(producer)) {
-            producer = new org.apache.kafka.clients.producer.KafkaProducer<>(producerConfig.getProperties());
+            producer = new KafkaProducer<>(producerConfig.getProperties());
         }
         return producer;
     }
 
-    public String getUserActionTopic() {
+    public String getTopic() {
         return producerConfig.getTopic();
     }
 

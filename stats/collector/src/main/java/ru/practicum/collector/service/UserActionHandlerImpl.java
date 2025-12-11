@@ -59,7 +59,7 @@ public class UserActionHandlerImpl implements UserActionHandler {
 
 
 //TODO генерация ошибки для tester.jar ))))))
-        if (Objects.nonNull(userActionAvro)) throw new RuntimeException();
+//        if (Objects.nonNull(userActionAvro)) throw new RuntimeException();
 
 
 

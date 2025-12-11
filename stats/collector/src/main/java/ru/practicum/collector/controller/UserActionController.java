@@ -25,6 +25,8 @@ public class UserActionController extends UserActionControllerGrpc.UserActionCon
         try {
             log.info("принят UserActionProto: {}", request);
             userActionHandler.handle(request);
+            responseObserver.onNext(Empty.getDefaultInstance());
+            responseObserver.onCompleted();
         } catch (Exception e) {
             responseObserver.onError(new StatusRuntimeException(
                     Status.INTERNAL

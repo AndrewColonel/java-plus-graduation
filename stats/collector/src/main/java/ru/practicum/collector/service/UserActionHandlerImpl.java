@@ -49,20 +49,10 @@ public class UserActionHandlerImpl implements UserActionHandler {
         String topic = collectorProducer.getTopic();
         ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(topic, userActionAvro);
         log.info("Объект Avro для отправки в брокер {} в топик {}", userActionAvro, topic);
-
         producer.send(record);
 //        Future<RecordMetadata> metadataFuture = producer.send(record);
 //        log.info("Состояние отправки: {} ", metadataFuture.isDone());
-//        producer.flush();
+        producer.flush();
 //        log.info("Состояние отправки: {} ", metadataFuture.isDone());
-
-
-
-//TODO генерация ошибки для tester.jar ))))))
-//        if (Objects.nonNull(userActionAvro)) throw new RuntimeException();
-
-
-
-
     }
 }

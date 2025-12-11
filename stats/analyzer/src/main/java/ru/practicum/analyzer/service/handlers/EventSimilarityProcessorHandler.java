@@ -44,9 +44,6 @@ public class EventSimilarityProcessorHandler implements EventSimilarityHandler{
                             .build();
                     return repository.save(newSimilarity);
                 });
-
         log.info("Сходство {} сохранено в БД", similarity);
-
-
     }
 }

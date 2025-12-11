@@ -1,7 +1,5 @@
 package ru.practicum.analyzer.service.handlers;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +8,9 @@ import ru.practicum.analyzer.dal.entity.Interaction;
 import ru.practicum.analyzer.dal.repository.InteractionRepository;
 import ru.practicum.ewm.stats.avro.UserActionAvro;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Slf4j
 @Component
@@ -30,16 +30,37 @@ public class UserActionProcessorHandler implements UserActionHandler {
     @Override
     public void handleRecord(UserActionAvro userActionAvro) {
 
-        Interaction interaction = repository.save(Interaction.builder()
-                .userId(userActionAvro.getUserId())
-                .eventId(userActionAvro.getEventId())
-                .rating(switch (userActionAvro.getActionType()) {
-                    case VIEW -> actionWeightView;
-                    case REGISTER -> actionWeightRegister;
-                    case LIKE -> actionWeightLike;
+        LocalDateTime ts = LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(userActionAvro.getTimestamp().toEpochMilli()),
+                ZoneOffset.UTC
+//                ZoneId.systemDefault()
+        );
+
+        Double newWeight = switch (userActionAvro.getActionType()) {
+            case VIEW -> actionWeightView;
+            case REGISTER -> actionWeightRegister;
+            case LIKE -> actionWeightLike;
+        };
+
+        Interaction interaction = repository.findByUserIdAndEventId(
+                        userActionAvro.getUserId(),
+                        userActionAvro.getEventId()
+                )
+                .map(existing -> {
+                    existing.setRating(Math.max(newWeight, existing.getRating()));
+                    existing.setTs(ts);
+                    return repository.save(existing);
                 })
-                .ts(LocalDateTime.from(userActionAvro.getTimestamp()))
-                .build());
+                .orElseGet(() -> {
+                    Interaction newInteraction = Interaction.builder()
+                            .userId(userActionAvro.getUserId())
+                            .eventId(userActionAvro.getEventId())
+                            .rating(newWeight)
+                            .ts(ts)
+                            .build();
+                    return repository.save(newInteraction);
+                });
+        log.info("Взаимодействие {} сохранено в БД", interaction);
 
     }
 }

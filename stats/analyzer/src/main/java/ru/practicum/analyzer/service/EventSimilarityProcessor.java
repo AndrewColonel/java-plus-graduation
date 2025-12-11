@@ -18,9 +18,9 @@ public class EventSimilarityProcessor extends BaseProcessor {
 
     @Autowired
     public EventSimilarityProcessor(KafkaConfig kafkaConfig, EventSimilarityHandler eventSimilarityHandler) {
-        super(kafkaConfig.getActionConsumer().getProperties(),
-                kafkaConfig.getActionConsumer().getTopic(),
-                kafkaConfig.getActionConsumer().getPollTimeout());
+        super(kafkaConfig.getSimilarityConsumer().getProperties(),
+                kafkaConfig.getSimilarityConsumer().getTopic(),
+                kafkaConfig.getSimilarityConsumer().getPollTimeout());
         this.eventSimilarityHandler = eventSimilarityHandler;
     }
 

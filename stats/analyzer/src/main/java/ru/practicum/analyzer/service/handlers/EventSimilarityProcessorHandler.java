@@ -7,7 +7,9 @@ import ru.practicum.analyzer.dal.entity.Similarity;
 import ru.practicum.analyzer.dal.repository.SimilarityRepository;
 import ru.practicum.ewm.stats.avro.EventSimilarityAvro;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Slf4j
 @Component
@@ -18,12 +20,33 @@ public class EventSimilarityProcessorHandler implements EventSimilarityHandler{
 
     @Override
     public void handleRecord(EventSimilarityAvro eventSimilarityAvro) {
-        Similarity similarity =  repository.save(Similarity.builder()
-                .event1(eventSimilarityAvro.getEventA())
-                .event2(eventSimilarityAvro.getEventB())
-                .similarity(eventSimilarityAvro.getScore())
-                .ts(LocalDateTime.from(eventSimilarityAvro.getTimestamp()))
-                .build());
+        LocalDateTime ts = LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(eventSimilarityAvro.getTimestamp().toEpochMilli()),
+                ZoneOffset.UTC
+//                ZoneId.systemDefault()
+        );
+
+        Similarity similarity = repository.findByEvent1AndEvent2(
+                        eventSimilarityAvro.getEventA(),
+                        eventSimilarityAvro.getEventB()
+                )
+                .map(existing -> {
+                    existing.setSimilarity(eventSimilarityAvro.getScore());
+                    existing.setTs(ts);
+                    return repository.save(existing);
+                })
+                .orElseGet(() -> {
+                    Similarity newSimilarity = Similarity.builder()
+                            .event1(eventSimilarityAvro.getEventA())
+                            .event2(eventSimilarityAvro.getEventB())
+                            .similarity(eventSimilarityAvro.getScore())
+                            .ts(ts)
+                            .build();
+                    return repository.save(newSimilarity);
+                });
+
         log.info("Сходство {} сохранено в БД", similarity);
+
+
     }
 }

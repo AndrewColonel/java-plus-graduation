@@ -9,8 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
 
 import ru.practicum.collector.service.UserActionHandler;
-import ru.practicum.grpc.stats.proto.UserActionControllerGrpc;
-import ru.practicum.grpc.stats.proto.UserActionProto;
+import ru.practicum.ewm.stats.proto.UserActionControllerGrpc;
+import ru.practicum.ewm.stats.proto.UserActionProto;
 
 
 @GrpcService

@@ -9,14 +9,14 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.stereotype.Component;
 
 
-
 import ru.practicum.collector.common.KafkaCollectorProducer;
 import ru.practicum.ewm.stats.avro.ActionTypeAvro;
 import ru.practicum.ewm.stats.avro.UserActionAvro;
-import ru.practicum.grpc.stats.proto.UserActionProto;
+import ru.practicum.ewm.stats.proto.UserActionProto;
 
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.Future;
 
 import static ru.practicum.collector.common.EnumMapper.toAvroEnum;
@@ -31,6 +31,7 @@ public class UserActionHandlerImpl implements UserActionHandler {
     @Override
     public void handle(UserActionProto userActionProto) {
 
+        log.trace("|||-- преобразую UserActionProto в UserActionAvro");
         UserActionAvro userActionAvro = UserActionAvro.newBuilder()
                 .setUserId(userActionProto.getUserId())
                 .setEventId(userActionProto.getEventId())
@@ -41,6 +42,9 @@ public class UserActionHandlerImpl implements UserActionHandler {
 
                 .build();
 
+        log.trace("|||-- объект UserActionProto с типом дейсвтия {}", userActionProto.getActionType());
+        log.info("|||-- преобразован в UserActionAvro {}", userActionAvro);
+
         Producer<String, SpecificRecordBase> producer = collectorProducer.getProducer();
         String topic = collectorProducer.getTopic();
         ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(topic, userActionAvro);
@@ -50,5 +54,14 @@ public class UserActionHandlerImpl implements UserActionHandler {
         log.info("Состояние отправки: {} ", metadataFuture.isDone());
         producer.flush();
         log.info("Состояние отправки: {} ", metadataFuture.isDone());
+
+
+
+//TODO генерация ошибки для tester.jar ))))))
+        if (Objects.nonNull(userActionAvro)) throw new RuntimeException();
+
+
+
+
     }
 }

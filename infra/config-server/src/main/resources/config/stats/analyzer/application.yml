@@ -60,3 +60,9 @@ analyzer:
       topic: "stats.events-similarity.v1"
       poll-timeout: 200ms
 
+
+  action:
+    weight:
+      view: 0.4
+      registered: 0.8
+      like: 1.0

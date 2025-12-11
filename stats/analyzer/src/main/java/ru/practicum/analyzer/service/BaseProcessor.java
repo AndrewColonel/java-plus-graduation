@@ -55,7 +55,7 @@ public abstract class BaseProcessor implements Runnable {
         } catch (WakeupException ignored) {
             log.warn("Вызван метод wakeup, poll будет прерван");
         } catch (Exception e) {
-            log.error("Ошибка во время обработки событий от датчиков", e);
+            log.error("Ошибка во время обработки событий", e);
         } finally {
             try {
                 consumer.commitSync(currentOffsets);

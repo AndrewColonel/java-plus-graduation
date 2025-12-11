@@ -144,7 +144,7 @@ public class AggregationStarter implements Runnable {
             optionalEventSimilarityAvro.ifPresentOrElse(s -> {
                         ProducerRecord<String, SpecificRecordBase> producerRecord =
                                 new ProducerRecord<>(topicProducer, s);
-                        log.info(">>> Снапшот {} для отправки в топик {}", s, topicProducer);
+                        log.info(">>> Расчитано сходство мероприятий {} для отправки в топик {}", s, topicProducer);
                         producer.send(producerRecord);
                     },
                     () -> {

@@ -50,10 +50,11 @@ public class UserActionHandlerImpl implements UserActionHandler {
         ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(topic, userActionAvro);
         log.info("Объект Avro для отправки в брокер {} в топик {}", userActionAvro, topic);
 
-        Future<RecordMetadata> metadataFuture = producer.send(record);
-        log.info("Состояние отправки: {} ", metadataFuture.isDone());
-        producer.flush();
-        log.info("Состояние отправки: {} ", metadataFuture.isDone());
+        producer.send(record);
+//        Future<RecordMetadata> metadataFuture = producer.send(record);
+//        log.info("Состояние отправки: {} ", metadataFuture.isDone());
+//        producer.flush();
+//        log.info("Состояние отправки: {} ", metadataFuture.isDone());
 
 
 

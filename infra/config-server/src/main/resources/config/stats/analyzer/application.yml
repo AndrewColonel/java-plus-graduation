@@ -15,6 +15,9 @@ logging:
       apache.kafka: INFO
     feign.Logger: WARN
 
+grpc:
+  server:
+    port: 0
 
 spring:
   datasource:

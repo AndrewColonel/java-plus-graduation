@@ -17,10 +17,14 @@ public class AnalyserRunner implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         Thread userActionThread = new Thread(userActionProcessor);
-        userActionThread.setName("UserActionThread");
+        userActionThread.setName("UserThread");
         userActionThread.start();
 
-        eventSimilarityProcessor.run();
+        Thread eventSimilarityThread = new Thread(eventSimilarityProcessor);
+        eventSimilarityThread.setName("SimilarThread");
+        eventSimilarityThread.start();
 
     }
 }
+
+

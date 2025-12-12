@@ -1,6 +1,5 @@
 package ru.practicum.analyzer.controller;
 
-
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;

@@ -1,4 +1,4 @@
-package ru.practicum.analyzer.service;
+package ru.practicum.analyzer.processor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
@@ -6,7 +6,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.practicum.analyzer.common.KafkaConfig;
-import ru.practicum.analyzer.service.handlers.UserActionHandler;
+import ru.practicum.analyzer.processor.handlers.UserActionHandler;
 import ru.practicum.ewm.stats.avro.UserActionAvro;
 
 @Slf4j

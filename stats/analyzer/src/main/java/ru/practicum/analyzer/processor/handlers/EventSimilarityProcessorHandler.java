@@ -1,4 +1,4 @@
-package ru.practicum.analyzer.service.handlers;
+package ru.practicum.analyzer.processor.handlers;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

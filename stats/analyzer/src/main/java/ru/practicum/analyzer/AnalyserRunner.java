@@ -3,8 +3,8 @@ package ru.practicum.analyzer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import ru.practicum.analyzer.service.EventSimilarityProcessor;
-import ru.practicum.analyzer.service.UserActionProcessor;
+import ru.practicum.analyzer.processor.EventSimilarityProcessor;
+import ru.practicum.analyzer.processor.UserActionProcessor;
 
 
 @Component

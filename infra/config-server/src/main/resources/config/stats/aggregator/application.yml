@@ -15,6 +15,12 @@ logging:
       apache.kafka: INFO
     feign.Logger: WARN
 
+
+grpc:
+  server:
+    port: 0
+
+
 aggregator:
   kafka:
     bootstrap-servers: localhost:9092

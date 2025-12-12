@@ -79,6 +79,8 @@ public class SimilarityServiceImpl implements SimilarityService {
         log.trace("|||-- текущее состояние матрицы всех событий {}", actionMatrix);
 
 
+
+        //TODO реализовать алгоритм вычисления сходства
         EventSimilarityAvro eventSimilarityAvro = EventSimilarityAvro.newBuilder()
                 .setEventA(RandomGenerator.getDefault().nextLong(100))
                 .setEventB(RandomGenerator.getDefault().nextLong(100))

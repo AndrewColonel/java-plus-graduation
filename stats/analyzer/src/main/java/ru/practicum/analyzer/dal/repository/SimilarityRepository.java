@@ -1,5 +1,6 @@
 package ru.practicum.analyzer.dal.repository;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -29,5 +30,33 @@ public interface SimilarityRepository extends JpaRepository<Similarity, Long> {
             "ORDER BY s.similarity DESC",
             nativeQuery = true)
     List<Similarity> findTopRelevantSimilarities(@Param("eventIds") Set<Long> eventIds, Pageable pageable);
+
+
+
+    // Убрать из выдачи те коэффициенты подобия,
+    // в которых пользователь взаимодействовал с обоими мероприятиями.
+    @Query("SELECT s FROM Similarity s " +
+            "WHERE (s.event1 = :eventId OR s.event2 = :eventId) " +
+            "  AND ( " +
+            "    (s.event1 = :eventId AND s.event2 NOT IN :userEventIds) " +
+            "    OR " +
+            "    (s.event2 = :eventId AND s.event1 NOT IN :userEventIds) " +
+            "  ) " +
+            "ORDER BY s.similarity DESC")
+    Page<Similarity> findSimilarEvents(
+            @Param("eventId") Long eventId,
+            @Param("userEventIds") Set<Long> userEventIds,
+            Pageable pageable
+    );
+
+    // без фильтра по списку пользовательских мероприятий,
+    // в условиях, когда такой список пуст
+    @Query("SELECT s FROM Similarity s " +
+            "WHERE s.event1 = :eventId OR s.event2 = :eventId " +
+            "ORDER BY s.similarity DESC")
+    Page<Similarity> findSimilarWithoutUserFilter(
+            @Param("eventId") Long eventId,
+            Pageable pageable);
+
 
 }

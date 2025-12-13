@@ -30,6 +30,25 @@ public class RecommendationServiceImpl implements RecommendationService {
     // возвращает поток рекомендованных мероприятий для указанного пользователя:
     public Stream<RecommendedEventProto> getRecommendationsForUser(UserPredictionsRequestProto request) {
 
+
+        // request.getMaxResults() в пределах Integer.MAX_VALUE
+        Pageable limit = PageRequest.of(0, Math.toIntExact(request.getMaxResults()));
+
+        // Получаем события, с которыми пользователь уже взаимодействовал, SET даст (O(1) вместо O(n))
+        // Списко взаимодейсвтий пользователя, отсортированный по по дате и ограниченный MaxResults количестом
+        Set<Long> userEventSet = interactionRepository.findByUserIdOrderByTsDesc(request.getUserId(),
+                        limit).stream()
+                .map(Interaction::getEventId)
+                .collect(Collectors.toSet());
+        // Если пользователь ещё не взаимодействовал ни с одним мероприятием, то рекомендовать нечего
+        if (userEventSet.isEmpty()) return Stream.empty();
+
+        // сортированный по убыванию похожести и ограниченный список, включающий пару мерроприятий,
+        // только с одним из которых взаимодействовал пользователь
+        List<Similarity> similarityList = similarityRepository.
+                findTopRelevantSimilarities(userEventSet, limit);
+
+
         // Получаем события, с которыми пользователь уже взаимодействовал, SET даст (O(1) вместо O(n))
         Set<Long> userEventSet = interactionRepository.findByUserId(request.getUserId()).stream()
                 .map(Interaction::getEventId)
@@ -43,6 +62,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         // Ограничиваем количество результатов
         Pageable limit = PageRequest.of(0, Math.toIntExact(request.getMaxResults()));
         // request.getMaxResults() в пределах Integer.MAX_VALUE
+
 
         // сортированный по убыванию похожести и ограниченный список, включающий пару мерроприятий,
         // только с одним из которых взаимодействовал пользователь
@@ -61,6 +81,8 @@ public class RecommendationServiceImpl implements RecommendationService {
                         // Стратегия разрешения похожести - максимальное значение
                         Double::max
                 ));
+
+
         return eventRatingMap.entrySet().stream()
                 .map(entry -> toProto(entry.getKey(), entry.getValue()));
     }
@@ -70,28 +92,54 @@ public class RecommendationServiceImpl implements RecommendationService {
     public Stream<RecommendedEventProto> getSimilarEvents(SimilarEventsRequestProto request) {
         // возвращает поток мероприятий, с которыми не взаимодействовал этот пользователь,
         // но которые максимально похожи на указанное мероприятие:
+        if (request.getMaxResults() <= 0) return Stream.empty();
 
-        // request.getMaxResults() в пределах Integer.MAX_VALUE
-        Pageable limit = PageRequest.of(0, Math.toIntExact(request.getMaxResults()));
+        // Для получение ограничения выборки, готовлю Pageable
+        // где N это request.getMaxResults()
+        // request.getMaxResults() - Long, должен быть в пределах Integer.MAX_VALUE, поэтому разумный лимит
+        int maxResults = (int) Math.min(request.getMaxResults(), 10_000L);
+        Pageable limit = PageRequest.of(0, maxResults);
 
         // Получаем события, с которыми пользователь уже взаимодействовал, SET даст (O(1) вместо O(n))
-        // Списко взаимодейсвтий пользователя, отсортированный по по дате и ограниченный MaxResults количестом
-        Set<Long> userEventSet = interactionRepository.findByUserIdOrderByTsDesc(request.getUserId(),
-                limit).stream()
+        Set<Long> userEventSet = interactionRepository.findByUserId(request.getUserId()).stream()
                 .map(Interaction::getEventId)
                 .collect(Collectors.toSet());
-        // Если пользователь ещё не взаимодействовал ни с одним мероприятием, то рекомендовать нечего
-        if (userEventSet.isEmpty()) return Stream.empty();
 
-        // сортированный по убыванию похожести и ограниченный список, включающий пару мерроприятий,
-        // только с одним из которых взаимодействовал пользователь
-        List<Similarity> similarityList = similarityRepository.
-                findTopRelevantSimilarities(userEventSet, limit);
+        // Выгружаю из базы список всех similarities, которые содержат пары мерроприятий, одно из которых
+        // соответсвует указанному,
+        long targetEventId = request.getEventId();
+        // с исключением тех,с которыми в которых пользователь взаимодействовал с обоими мероприятиями.
+        // Список отсортирован по убыванию похожести и ограничен
 
+        List<Similarity> similarityList;
+        if (userEventSet.isEmpty()) {
+            // Если пользователь ещё не взаимодействовал ни с одним мероприятием
+            // необходимо вызвать другой метод
+            // В JPQL NOT IN :emptySet генерирует SQL NOT IN (), что приводит к ошибке
+            similarityList = similarityRepository.findSimilarWithoutUserFilter(
+                    targetEventId, limit).getContent();
+        } else {
+            similarityList = similarityRepository.findSimilarEvents(
+                    targetEventId, userEventSet, limit).getContent();
+        }
 
+        // Собираем мапу, ключ- рекомендуемое событие, значение -похожесть (с разрешением конфликтов)
+        Map<Long, Double> eventRatingMap = similarityList.stream()
+                .collect(Collectors.toMap(
+                        similarity -> similarity.getEvent1() == targetEventId
+                                ? similarity.getEvent2()
+                                : similarity.getEvent1(),
+                        Similarity::getSimilarity,
+                        //обработка дубликатов - при наличии двух записей с одним и тем же рекомендуемым eventId будет:
+                        //IllegalStateException: Duplicate key
+                        // Стратегия разрешения похожести - максимальное значение
+                        Double::max
+                ));
 
-        return Stream.empty();
+        return eventRatingMap.entrySet().stream()
+                .map(entry -> toProto(entry.getKey(), entry.getValue()));
     }
+
 
     @Override
     public Stream<RecommendedEventProto> getInteractionsCount(InteractionsCountRequestProto request) {

@@ -95,7 +95,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         // для учета всех меррпориятий из списка
         // Инициализируем мапу всеми запрошенными ID
         Map<Long, Double> eventRatingMap = request.getEventIdList().stream()
-                .collect(Collectors.toMap(id -> id, id -> 0.0));
+                .collect(Collectors.toMap(eventId -> eventId, eventId -> 0.0));
         // Добавляем реальные коэффициенты
         interactionRepository.findByEventIdIn(request.getEventIdList())
                 .stream()

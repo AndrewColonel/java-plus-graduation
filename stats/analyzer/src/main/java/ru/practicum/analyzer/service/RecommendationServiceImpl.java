@@ -31,18 +31,22 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .map(Interaction::getEventId)
                 .toList();
         // список подобий Similarities пользователя
+        // Если eventIds пустой, запрос вернёт все записи? на самом деле в большинстве БД IN () — ошибка).
+        if (userEventList.isEmpty()) return Stream.empty();
         List<Similarity> similarityList = similarityRepository.findByEvent1InOrEvent2In(userEventList).stream()
                 // Убираем из выдачи те коэффициенты подобия, в которых пользователь взаимодействовал с обоими мероприятиями.
                 .filter(similarity -> !Objects.equals(similarity.getEvent1(), similarity.getEvent2()))
                 // для дальнейшей сортировки фильтр на NULL в "похожести"
                 .filter(similarity -> similarity.getSimilarity() != null)
                 // сортировка по возрастанию похожести
-                .sorted(Comparator.comparingDouble(Similarity::getSimilarity))
+                .sorted(Comparator.comparingDouble(Similarity::getSimilarity).reversed())
                 // выбрать первые заданные N.
                 .limit(request.getMaxResults())
                 .toList();
-        // собираю мапу из eventId, тот из пары, которого нет в списке мероприятий
-        // с которыми уже взаимоджейсвтовал прльзователь и показатель похожести для этого мерпориятий
+        // собираю мапу из eventId,
+        // тот event из пары, которого нет в списке мероприятий с которыми уже взаимоджейсвтовал прльзователь,
+        // станет ключом
+        // и в качестве значения - показатель похожести для этого мерпориятий
         Map<Long, Double> eventRatingMap = similarityList.stream()
                 .collect(Collectors.toMap(
                         similarity ->
@@ -50,7 +54,6 @@ public class RecommendationServiceImpl implements RecommendationService {
                                         ? similarity.getEvent2() : similarity.getEvent1()
                         , Similarity::getSimilarity
                 ));
-
         return eventRatingMap.entrySet().stream()
                 .map(entry -> toProto(entry.getKey(), entry.getValue()));
     }

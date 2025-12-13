@@ -1,0 +1,30 @@
+package ru.practicum.analyzer;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+import ru.practicum.analyzer.processor.EventSimilarityProcessor;
+import ru.practicum.analyzer.processor.UserActionProcessor;
+
+
+@Component
+@RequiredArgsConstructor
+public class AnalyserRunner implements CommandLineRunner {
+    final UserActionProcessor userActionProcessor;
+    final EventSimilarityProcessor eventSimilarityProcessor;
+
+    @Override
+    public void run(String... args) throws Exception {
+
+        Thread userActionThread = new Thread(userActionProcessor);
+        userActionThread.setName("UserThread");
+        userActionThread.start();
+
+        Thread eventSimilarityThread = new Thread(eventSimilarityProcessor);
+        eventSimilarityThread.setName("SimilarThread");
+        eventSimilarityThread.start();
+
+    }
+}
+
+

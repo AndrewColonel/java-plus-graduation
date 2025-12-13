@@ -1,0 +1,32 @@
+logging:
+  level:
+    ru.practicum.collector: TRACE
+    org:
+      springframework:
+        orm:
+          jpa: INFO
+          jpa.JpaTransactionManager: INFO
+        transaction: INFO
+        transaction.interceptor: INFO
+      springframework.cloud.netflix.eureka: INFO
+      springframework.web.client.RestTemplate: WARN
+      org.springframework.cloud.openfeign: DEBUG
+      com.fasterxml.jackson: DEBUG
+      apache.kafka: INFO
+    feign.Logger: WARN
+
+
+grpc:
+  server:
+    port: 0
+
+collector:
+  kafka:
+    bootstrap-servers: localhost:9092
+    producerconfig:
+      properties:
+        bootstrap.servers: "${collector.kafka.bootstrap-servers}"
+        key.serializer: "org.apache.kafka.common.serialization.LongSerializer"
+        value.serializer: "ru.practicum.kafka.serializer.GeneralAvroSerializer"
+#        linger.ms: 0
+      topic: "stats.user-actions.v1"

@@ -44,6 +44,8 @@ public class RecommendationServiceImpl implements RecommendationService {
         Pageable limit = PageRequest.of(0, Math.toIntExact(request.getMaxResults()));
         // request.getMaxResults() в пределах Integer.MAX_VALUE
 
+        // сортированный по убыванию похожести и ограниченный список, включающий пару мерроприятий,
+        // только с одним из которых взаимодействовал пользователь
         List<Similarity> similarityList = similarityRepository.
                 findTopRelevantSimilarities(userEventSet, limit);
 
@@ -68,7 +70,24 @@ public class RecommendationServiceImpl implements RecommendationService {
     public Stream<RecommendedEventProto> getSimilarEvents(SimilarEventsRequestProto request) {
         // возвращает поток мероприятий, с которыми не взаимодействовал этот пользователь,
         // но которые максимально похожи на указанное мероприятие:
-        // TODO
+
+        // request.getMaxResults() в пределах Integer.MAX_VALUE
+        Pageable limit = PageRequest.of(0, Math.toIntExact(request.getMaxResults()));
+
+        // Получаем события, с которыми пользователь уже взаимодействовал, SET даст (O(1) вместо O(n))
+        // Списко взаимодейсвтий пользователя, отсортированный по по дате и ограниченный MaxResults количестом
+        Set<Long> userEventSet = interactionRepository.findByUserIdOrderByTsDesc(request.getUserId(),
+                limit).stream()
+                .map(Interaction::getEventId)
+                .collect(Collectors.toSet());
+        // Если пользователь ещё не взаимодействовал ни с одним мероприятием, то рекомендовать нечего
+        if (userEventSet.isEmpty()) return Stream.empty();
+
+        // сортированный по убыванию похожести и ограниченный список, включающий пару мерроприятий,
+        // только с одним из которых взаимодействовал пользователь
+        List<Similarity> similarityList = similarityRepository.
+                findTopRelevantSimilarities(userEventSet, limit);
+
 
 
         return Stream.empty();

@@ -21,11 +21,13 @@ public interface SimilarityRepository extends JpaRepository<Similarity, Long> {
     // метод выгружает похожести, соотвесвтующие списку и убирает те коэфициенты,
     //  в которых пользователь взаимодействовал с обоими мероприятиями.
     // сортировка по убыванию значению коэффициента
-    @Query("SELECT s FROM Similarity s " +
+
+    @Query(value = "SELECT * FROM similarity s " +
             "WHERE (s.event1 IN :eventIds OR s.event2 IN :eventIds) " +
-            "AND (s.event1 IN :eventIds) <> (s.event2 IN :eventIds) " +
             // XOR: ровно одно событие из пары принадлежит пользователю
-            "ORDER BY s.similarity DESC")
+            "AND (s.event1 IN :eventIds) <> (s.event2 IN :eventIds) " +
+            "ORDER BY s.similarity DESC",
+            nativeQuery = true)
     List<Similarity> findTopRelevantSimilarities(@Param("eventIds") Set<Long> eventIds, Pageable pageable);
 
 }

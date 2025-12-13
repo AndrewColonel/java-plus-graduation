@@ -1,5 +1,6 @@
 package ru.practicum.analyzer.dal.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.analyzer.dal.entity.Interaction;
 
@@ -14,4 +15,8 @@ public interface InteractionRepository extends JpaRepository<Interaction, Long> 
     List<Interaction> findByEventIdIn(List<Long> eventId);
 
     List<Interaction> findByUserId(Long userId);
+
+
+    List<Interaction> findByUserIdOrderByTsDesc(Long userId, Pageable pageable);
+
 }

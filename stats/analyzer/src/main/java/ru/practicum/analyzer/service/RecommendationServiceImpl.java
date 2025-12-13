@@ -42,6 +42,8 @@ public class RecommendationServiceImpl implements RecommendationService {
         // ровно одно событие из пары принадлежит пользователю
         // Ограничиваем количество результатов
         Pageable limit = PageRequest.of(0, Math.toIntExact(request.getMaxResults()));
+        // request.getMaxResults() в пределах Integer.MAX_VALUE
+
         List<Similarity> similarityList = similarityRepository.
                 findTopRelevantSimilarities(userEventSet, limit);
 
@@ -77,13 +79,31 @@ public class RecommendationServiceImpl implements RecommendationService {
         // получает идентификаторы мероприятий и возвращает их поток с суммой максимальных
         // весов действий каждого пользователя с этими мероприятиями:
         if (request.getEventIdList().isEmpty()) return Stream.empty();
-        List<Interaction> interactionList = interactionRepository.findByEventIdIn(request.getEventIdList());
-        Map<Long, Double> eventRatingMap = interactionList.stream()
+        // чтобы не превысить лимит параметров SQL )))
+        if (request.getEventIdList().size() > 1000) {
+            throw new IllegalArgumentException("Слишком много мероприятий в запросе");
+        }
+
+        // события из request.getEventIdList() которых= нет в БД в результат не войдут !!!
+//        List<Interaction> interactionList = interactionRepository.findByEventIdIn(request.getEventIdList());
+//        Map<Long, Double> eventRatingMap = interactionList.stream()
+//                .filter(interaction -> interaction.getRating() != null)
+//                .collect(Collectors.groupingBy(
+//                        Interaction::getEventId,
+//                        Collectors.summingDouble(Interaction::getRating)
+//                ));
+        // для учета всех меррпориятий из списка
+        // Инициализируем мапу всеми запрошенными ID
+        Map<Long, Double> eventRatingMap = request.getEventIdList().stream()
+                .collect(Collectors.toMap(id -> id, id -> 0.0));
+        // Добавляем реальные коэффициенты
+        interactionRepository.findByEventIdIn(request.getEventIdList())
+                .stream()
                 .filter(interaction -> interaction.getRating() != null)
-                .collect(Collectors.groupingBy(
-                        Interaction::getEventId,
-                        Collectors.summingDouble(Interaction::getRating)
-                ));
+                .forEach(interaction ->
+                        eventRatingMap.merge(interaction.getEventId(), interaction.getRating(), Double::sum)
+                );
+
         return eventRatingMap.entrySet().stream()
                 .map(entry -> toProto(entry.getKey(), entry.getValue()));
     }

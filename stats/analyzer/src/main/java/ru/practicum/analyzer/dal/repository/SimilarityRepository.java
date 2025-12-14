@@ -22,14 +22,6 @@ public interface SimilarityRepository extends JpaRepository<Similarity, Long> {
     // метод выгружает похожести, соотвесвтующие списку и убирает те коэфициенты,
     //  в которых пользователь взаимодействовал с обоими мероприятиями.
     // сортировка по убыванию значению коэффициента
-//    @Query(value = "SELECT * FROM similarity s " +
-//            "WHERE (s.event1 IN :eventIds OR s.event2 IN :eventIds) " +
-//            // XOR: ровно одно событие из пары принадлежит пользователю
-//            "AND (s.event1 IN :eventIds) <> (s.event2 IN :eventIds) " +
-//            "ORDER BY s.similarity DESC",
-//            nativeQuery = true)
-//    Page<Similarity> findTopRelevantSimilarities(@Param("eventIds") Set<Long> eventIds, Pageable pageable);
-
     @Query("SELECT s FROM Similarity s " +
             "WHERE (s.event1 IN :eventIds OR s.event2 IN :eventIds) " +
             "AND ( " +
@@ -42,22 +34,33 @@ public interface SimilarityRepository extends JpaRepository<Similarity, Long> {
     Page<Similarity> findTopRelevantSimilarities(@Param("eventIds") Set<Long> eventIds, Pageable pageable);
 
 
-    // Убрать из выдачи те коэффициенты подобия,
-    // в которых пользователь НЕ  взаимодействовал с обоими мероприятиями.
-    @Query("SELECT s FROM Similarity s " +
-            "WHERE (s.event1 = :eventId OR s.event2 = :eventIds) " +
-            "AND ( " +
-            "    (s.event1 = :eventId AND s.event2 IN :userEventIds) " +
-            "    OR " +
-            "    (s.event2 = :eventId AND s.event1 IN :userEventIds) " +
-            "  ) " +
-            "ORDER BY s.similarity DESC")
-    Page<Similarity> findUserRelevantSimilarities(
-            @Param("eventId") Long eventId,
-            @Param("userEventIds") Set<Long> userEventIds,
-            Pageable pageable
-    );
+//    // Убрать из выдачи те коэффициенты подобия,
+//    // в которых пользователь НЕ  взаимодействовал с обоими мероприятиями.
+//    @Query("SELECT s FROM Similarity s " +
+//            "WHERE (s.event1 = :eventId OR s.event2 = :eventIds) " +
+//            "AND ( " +
+//            "    (s.event1 = :eventId AND s.event2 IN :userEventIds) " +
+//            "    OR " +
+//            "    (s.event2 = :eventId AND s.event1 IN :userEventIds) " +
+//            "  ) " +
+//            "ORDER BY s.similarity DESC")
+//    Page<Similarity> findUserRelevantSimilarities(
+//            @Param("eventId") Long eventId,
+//            @Param("userEventIds") Set<Long> userEventIds,
+//            Pageable pageable
+//    );
 
+
+    @Query("SELECT s FROM Similarity s " +
+            "WHERE (" +
+            "  (s.event1 IN :newEventIds AND s.event2 IN :userEventIds) " +
+            "  OR " +
+            "  (s.event1 IN :userEventIds AND s.event2 IN :newEventIds)" +
+            ")")
+   List<Similarity> findUserRelevantSimilarities(
+            @Param("newEventIds") Set<Long> newEventIds,
+            @Param("userEventIds") Set<Long> userEventIds
+    );
 
     // Убрать из выдачи те коэффициенты подобия,
     // в которых пользователь взаимодействовал с обоими мероприятиями.
@@ -69,7 +72,7 @@ public interface SimilarityRepository extends JpaRepository<Similarity, Long> {
             "    (s.event2 = :eventId AND s.event1 NOT IN :userEventIds) " +
             "  ) " +
             "ORDER BY s.similarity DESC")
-    Page<Similarity> findSimilarEvents(
+        Page<Similarity> findSimilarEvents(
             @Param("eventId") Long eventId,
             @Param("userEventIds") Set<Long> userEventIds,
             Pageable pageable

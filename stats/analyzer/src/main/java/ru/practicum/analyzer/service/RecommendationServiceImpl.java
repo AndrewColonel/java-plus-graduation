@@ -14,10 +14,7 @@ import ru.practicum.ewm.stats.proto.RecommendedEventProto;
 import ru.practicum.ewm.stats.proto.SimilarEventsRequestProto;
 import ru.practicum.ewm.stats.proto.UserPredictionsRequestProto;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,11 +25,6 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     private final InteractionRepository interactionRepository;
     private final SimilarityRepository similarityRepository;
-
-
-    // Ограничем выборку пользовательских мероприятий для расчета предсказаний оценки
-    private static int USER_LIMIT = 10;
-
 
     @Override
     // возвращает поток рекомендованных мероприятий для указанного пользователя:
@@ -45,8 +37,8 @@ public class RecommendationServiceImpl implements RecommendationService {
         int maxResults = (int) Math.min(request.getMaxResults(), 30L);
         Pageable limit = PageRequest.of(0, maxResults);
 
-        // Получаем события, с которыми пользователь уже взаимодействовал, SET даст (O(1) вместо O(n))
-        // Списко взаимодейсвтий пользователя, отсортированный по по дате и ограниченный MaxResults количестом
+        //1. Этап -  Подбор мероприятий, с которыми пользователь ещё не взаимодействовал.
+        // а. Получить недавно просмотренные - Получаем последние N событий пользователя
         Set<Long> userLatestEventSet = interactionRepository.findByUserIdOrderByTsDesc(request.getUserId(),
                         limit).stream()
                 .map(Interaction::getEventId)
@@ -58,7 +50,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         } else {
             log.trace("Списко ID мероприятий, с которыми взаимодействовал пользователь - {}", userLatestEventSet);
         }
-
+        // б. Найти похожие новые - Находим все похожие события (рекомендации)
         // сортированный по убыванию похожести и ограниченный список, включающий пару мерроприятий,
         // только с одним из которых взаимодействовал пользователь,
         // а второе событие - максимально похожее, но с ним пользователь не взаимодействовал
@@ -72,94 +64,98 @@ public class RecommendationServiceImpl implements RecommendationService {
             log.trace("||||||||||||||||| -------- Список SIMILARITIES с парами мерроприятий - {}", similarityList);
         }
 
-//        // Список ID мероприятий, похожие на те, что отобрали на предыдущем этапе,
-//        // но при этом пользователь с ними не взаимодействовал.
-//        List<Long> newEvenetList = similarityList.stream()
-//                .map(similarity -> userLatestEventSet.contains(similarity.getEvent1()) ?
-//                        similarity.getEvent2() : similarity.getEvent1())
-//                .toList();
+        // c. Выбрать N самых похожих.
+        // Получаем ВСЕ события, с которыми пользователь уже взаимодействовал, SET даст (O(1) вместо O(n))
+        Set<Long> userEventIds = interactionRepository.findByUserId(request.getUserId()).stream()
+                .map(Interaction::getEventId)
+                .collect(Collectors.toSet());
+        // Извлекаем рекомендуемые ID мероприятий, с которыми пользователь не взаимодействовал
+        Set<Long> newEventIds = similarityList.stream()
+                .map(sim -> userLatestEventSet.contains(sim.getEvent1()) ?
+                        sim.getEvent2() :
+                        sim.getEvent1())
+                .filter(id -> !userEventIds.contains(id)) // ← критически важно!
+                .collect(Collectors.toSet());
 
-        // Мапа, в которой ключи - это  ID мероприятий, похожие на те, что отобрали на предыдущем этапе,
-        // но при этом пользователь с ними не взаимодействовал.
-        // значения заполняю 0, чтобы потом поместить туда предсказанную оценку
-        Map<Long, Double> recommendationMap = similarityRepository.
-                findTopRelevantSimilarities(userLatestEventSet, limit).stream()
-                .collect(Collectors.toMap(
-                        similarity -> userLatestEventSet.contains(similarity.getEvent1()) ?
-                                similarity.getEvent2() : similarity.getEvent1(),
-                        similarity -> 0.0
-                ));
-
+        if (newEventIds.isEmpty()) {
+            log.trace("||||||||||||||||| -------- Список newEventIds пуст");
+            return Stream.empty();
+        } else {
+            log.trace("||||||||||||||||| -------- Список newEventIds  - {}", newEventIds);
+        }
 
         log.debug("|||| ------------------------------------------------------------------------------------- ||||");
-        log.trace("|||| ------ Список ID новый для пользователя мерроприятий, для которых вычисляем оценку - {}",
-                recommendationMap.keySet());
+        log.trace("|||| ------ Список ID рекомендуемых для пользователя мерроприятий, для которых вычисляем оценку - {}",
+                newEventIds);
         log.debug("|||| ------ Полученная длина списка - {}  ------- ||||",
-                recommendationMap.keySet().size());
+                newEventIds.size());
         log.debug("|||| ------ Запрошенная длина списк - {}  ------- ||||",
                 request.getMaxResults());
         log.debug("|||| ------------------------------------------------------------------------------------- ||||");
 
-        // Получаем события, с которыми пользователь уже взаимодействовал, SET даст (O(1) вместо O(n))
-        Set<Long> userEventSet = interactionRepository.findByUserId(request.getUserId()).stream()
-                .map(Interaction::getEventId)
+
+        // 2. Вычисление оценки для каждого нового мероприятия.
+        // a. Найти K ближайших соседей.
+        // Загружаем ВСЕ нужные Similarity за 1 запрос
+        List<Similarity> allSimilarities = similarityRepository.findUserRelevantSimilarities(
+                newEventIds, userEventIds
+        );
+
+        log.debug("Загружено {} записей Similarity для расчёта", allSimilarities.size());
+
+                // Группируем мапу по newEventId
+        Map<Long, List<Similarity>> similaritiesByNewEvent = allSimilarities.stream()
+                .collect(Collectors.groupingBy(
+                        sim -> newEventIds.contains(sim.getEvent1()) ?
+                                sim.getEvent1() :
+                                sim.getEvent2()
+                ));
+
+        // б. Получить оценки.
+        // Загружаем ВСЕ рейтинги за 1 запрос
+        Set<Long> allUserEventIds = allSimilarities.stream()
+                .map(sim ->
+                        newEventIds.contains(sim.getEvent1()) ? sim.getEvent2() : sim.getEvent1())
                 .collect(Collectors.toSet());
 
-
-        // вычисляем оценку для нового, незнакомого пользователю мероприятия
-        // Ограничем выборку пользовательских мероприятий для расчете USER_LIMIT мероприятиями
-
-        // размер данного цикла - ограничен и сравнительно мал, позволительно сделать запросы к базе в цикле?
-        for (Long newEventId : recommendationMap.keySet()) {
-            // нашли  USER_LIMIT мероприятий пользователя, максимально похожие на newEventId
-            // собрал мапу - userEventId -> sim
-            Map<Long, Double> userEventSimMap =
-                    similarityRepository.findUserRelevantSimilarities(
-                                    newEventId,
-                                    userEventSet,
-                                    PageRequest.of(0, USER_LIMIT)).stream()
-                            .collect(Collectors.toMap(
-                                    similarity -> Objects.equals(similarity.getEvent1(), newEventId)
-                                            ? similarity.getEvent2()
-                                            : similarity.getEvent1(),
-                                    Similarity::getSimilarity,
-                                    //обработка дубликатов - при наличии двух записей с одним и тем же рекомендуемым eventId будет:
-                                    //IllegalStateException: Duplicate key
-                                    // Стратегия разрешения похожести - максимальное значение
-                                    Double::max
-                            ));
-            // Получил оценки для выбранных мероприятий
-            // собрал мапу - userEventId -> rate
-            Map<Long, Double> userEvenetRateMap =
-                    interactionRepository.findByEventIdIn(userEventSimMap.keySet().stream().toList()).stream()
-                            .collect(Collectors.toMap(
-                                    Interaction::getEventId,
-                                    Interaction::getRating
-                            ));
-
-            //Вычислить сумму взвешенных оценок
-            double sumOfWeightedEstimates = 0.0;
-            for (Map.Entry<Long, Double> UserEventSimEntry : userEventSimMap.entrySet()) {
-                sumOfWeightedEstimates = sumOfWeightedEstimates
-                        + UserEventSimEntry.getValue()
-                                * userEvenetRateMap.getOrDefault(UserEventSimEntry.getKey(),0.0);
-            }
-
-            // Вычислить сумму коэффициентов подобия
-            double sumOfSimilarityCoefficients = 0.0;
-            for (Double sim : userEventSimMap.values()) {
-                sumOfSimilarityCoefficients = sumOfSimilarityCoefficients + sim;
-            }
-
-            // Вычислить оценку нового мероприятия
-            double evaluationRatingOfNewEvent = sumOfWeightedEstimates / sumOfSimilarityCoefficients;
-
-            recommendationMap.put(newEventId,evaluationRatingOfNewEvent);
+        if (allUserEventIds.isEmpty()) {
+            log.trace("||||||||||||||||| -------- Список allUserEventIds пуст");
+            return Stream.empty();
+        } else {
+            log.trace("||||||||||||||||| -------- Список allUserEventIds  - {}", allUserEventIds);
         }
 
+        // собираю мапу пользовательских оценок
+        Map<Long, Double> userRatings = interactionRepository.findByEventIdIn(allUserEventIds.stream().toList())
+                .stream()
+                .collect(Collectors.toMap(Interaction::getEventId, Interaction::getRating));
 
-        return recommendationMap.entrySet().stream()
-                .map(entry -> toProto(entry.getKey(), entry.getValue()));
+
+        // c. Вычисляем оценки
+        Map<Long, Double> recommendations = new HashMap<>();
+        for (Map.Entry<Long, List<Similarity>> entry : similaritiesByNewEvent.entrySet()) {
+            Long newEventId = entry.getKey();
+            double weightedSum = 0.0;
+            double similaritySum = 0.0;
+
+            for (Similarity sim : entry.getValue()) {
+                Long userEventId = newEventId.equals(sim.getEvent1())
+//                Long userEventId = newEventIds.contains(sim.getEvent1())
+                        ? sim.getEvent2()
+                        : sim.getEvent1();
+                double rating = userRatings.getOrDefault(userEventId, 0.0);
+                double simValue = sim.getSimilarity();
+
+                weightedSum += simValue * rating;
+                similaritySum += simValue;
+            }
+
+            double prediction = (similaritySum == 0) ? 0.0 : weightedSum / similaritySum;
+            recommendations.put(newEventId, prediction);
+        }
+
+        return recommendations.entrySet().stream()
+                .map(e -> toProto(e.getKey(), e.getValue()));
     }
 
 

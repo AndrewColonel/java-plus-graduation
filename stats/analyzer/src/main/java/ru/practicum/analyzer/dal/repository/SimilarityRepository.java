@@ -50,7 +50,7 @@ public interface SimilarityRepository extends JpaRepository<Similarity, Long> {
 //            Pageable pageable
 //    );
 
-
+    // метод выгружает Similarities из двух списков для расчета рекомендаций
     @Query("SELECT s FROM Similarity s " +
             "WHERE (" +
             "  (s.event1 IN :newEventIds AND s.event2 IN :userEventIds) " +

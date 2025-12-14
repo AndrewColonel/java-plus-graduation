@@ -165,7 +165,12 @@ public class RecommendationServiceImpl implements RecommendationService {
         // но которые максимально похожи на указанное мероприятие:
         log.info("Начат расчет getSimilarEvents для поиска мероприятий, похожих на заданное");
 
-        if (request.getMaxResults() <= 0) return Stream.empty();
+        if (request.getMaxResults() <= 0) {
+            log.trace("||||||||||||||||| -------- параметр  getMaxResults  <= 0");
+            return Stream.empty();
+        } else {
+            log.trace("||||||||||||||||| -------- параметр  getMaxResults  - {}", request.getMaxResults());
+        }
 
         // Для получение ограничения выборки, готовлю Pageable
         // где N это request.getMaxResults()
@@ -191,6 +196,7 @@ public class RecommendationServiceImpl implements RecommendationService {
             // Если пользователь ещё не взаимодействовал ни с одним мероприятием
             // необходимо вызвать другой метод
             // В JPQL NOT IN :emptySet генерирует SQL NOT IN (), что приводит к ошибке
+            log.trace("||||||||||||||||| -------- Список userEventSet() пуст");
             similarityList = similarityRepository.findSimilarWithoutUserFilter(
                     targetEventId, limit).getContent();
         } else {
@@ -224,7 +230,13 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         log.info("Начат расчет getInteractionsCount суммы максимальных весов взаимодействий пользователей с указанными мероприятиями");
 
-        if (request.getEventIdList().isEmpty()) return Stream.empty();
+        if (request.getEventIdList().isEmpty()) {
+            log.trace("||||||||||||||||| -------- Список EventIdList() пуст");
+            return Stream.empty();
+        } else {
+            log.trace("||||||||||||||||| -------- Список EventIdList()  - {}", request.getEventIdList());
+        }
+
         // чтобы не превысить лимит параметров SQL )))
         if (request.getEventIdList().size() > 1000) {
             throw new IllegalArgumentException("Слишком много мероприятий в запросе");

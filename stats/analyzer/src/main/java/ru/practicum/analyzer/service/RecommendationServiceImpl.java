@@ -103,7 +103,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         log.debug("Загружено {} записей Similarity для расчёта", allSimilarities.size());
 
-                // Группируем мапу по newEventId
+        // Группируем мапу по newEventId
         Map<Long, List<Similarity>> similaritiesByNewEvent = allSimilarities.stream()
                 .collect(Collectors.groupingBy(
                         sim -> newEventIds.contains(sim.getEvent1()) ?
@@ -163,6 +163,8 @@ public class RecommendationServiceImpl implements RecommendationService {
     public Stream<RecommendedEventProto> getSimilarEvents(SimilarEventsRequestProto request) {
         // возвращает поток мероприятий, с которыми не взаимодействовал этот пользователь,
         // но которые максимально похожи на указанное мероприятие:
+        log.info("Начат расчет getSimilarEvents для поиска мероприятий, похожих на заданное");
+
         if (request.getMaxResults() <= 0) return Stream.empty();
 
         // Для получение ограничения выборки, готовлю Pageable
@@ -175,6 +177,8 @@ public class RecommendationServiceImpl implements RecommendationService {
         Set<Long> userEventSet = interactionRepository.findByUserId(request.getUserId()).stream()
                 .map(Interaction::getEventId)
                 .collect(Collectors.toSet());
+
+        log.trace("||||||||||||||||| -------- Список userEventSet  - {}", userEventSet);
 
         // Выгружаю из базы список всех similarities, которые содержат пары мерроприятий, одно из которых
         // соответсвует указанному,
@@ -217,6 +221,9 @@ public class RecommendationServiceImpl implements RecommendationService {
     public Stream<RecommendedEventProto> getInteractionsCount(InteractionsCountRequestProto request) {
         // получает идентификаторы мероприятий и возвращает их поток с суммой максимальных
         // весов действий каждого пользователя с этими мероприятиями:
+
+        log.info("Начат расчет getInteractionsCount суммы максимальных весов взаимодействий пользователей с указанными мероприятиями");
+
         if (request.getEventIdList().isEmpty()) return Stream.empty();
         // чтобы не превысить лимит параметров SQL )))
         if (request.getEventIdList().size() > 1000) {
@@ -242,6 +249,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .forEach(interaction ->
                         eventRatingMap.merge(interaction.getEventId(), interaction.getRating(), Double::sum)
                 );
+        log.trace("||||||||||||||||| --------  userEventSet eventRatingMap - {}", eventRatingMap);
 
         return eventRatingMap.entrySet().stream()
                 .map(entry -> toProto(entry.getKey(), entry.getValue()));

@@ -4,12 +4,13 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.stats.avro.ActionTypeAvro;
 import ru.practicum.ewm.stats.avro.EventSimilarityAvro;
 import ru.practicum.ewm.stats.avro.UserActionAvro;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.random.RandomGenerator;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,72 +26,79 @@ public class SimilarityServiceImpl implements SimilarityService {
     private Double actionWeightLike;
 
     // матрица весов Map<Event, Map<User, Weight>>
-    private final Map<Long, Map<Long, Double>> actionMatrix = new HashMap<>();
+    private final Map<Long, Map<Long, Double>> actionMatrix = new TreeMap<>();
+    // общие суммы весов каждого из мероприятий, где ключ — мероприятие,
+    // а значение — сумма весов действий пользователей с ним.
+    // Map<Event,SUM Weight>
+    private final Map<Long, Double> commonWeightSumMap = new HashMap<>();
 
     @Override
     public Optional<EventSimilarityAvro> similarityProcessing(UserActionAvro userActionAvro) {
 
+        Long eventId = userActionAvro.getEventId();
+        Long userId = userActionAvro.getUserId();
+        Double actionWeight = getActionWeight(userActionAvro.getActionType());
+
+        log.trace("|||-- принято в обработку: {}", userActionAvro);
+        log.trace("|||-- вес дейсвия {} равен: {}", userActionAvro.getActionType(), actionWeight);
+
+        // собираем матрицу весов действий пользователей c мероприятиями в виде отображения. Map<Event, Map<User, Weight>>
+        Map<Long, Double> userWeightMap = actionMatrix.computeIfAbsent(eventId, k -> new HashMap<>());
+        // userWeightMap.merge(userId, actionWeight, Double::max);
+
+        Double oldWeight = actionMatrix.get(eventId).getOrDefault(userId, 0.0);
+        Double newWeight = userWeightMap.merge(userId, actionWeight, (old, newW) -> {
+            Double result = Math.max(old, newW);
+            log.trace("|||-- <<<<MAX WEIGHT COMPUTED>>>>> такой пользователь {} УЖЕ взаимодейстовал с мероприятием {}",
+                    userId, eventId);
+            log.trace("|||-- СТАРЫЙ  вес действия: {}", old);
+            log.trace("|||-- НОВЫЙ максимальный вес действия: {}", result);
+
+            return result;
+        });
+        log.trace("|||-- ТЕКУШЕЕ состояние вектора события:  {} = {}:", eventId, userWeightMap);
+        log.trace("|||-- текущее состояние матрицы всех событий {}", actionMatrix);
+
+        if (newWeight > oldWeight) {
+            log.trace("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            log.trace("|||-- СТАРЫЙ  вес действия: {}", oldWeight);
+            log.trace("|||-- НОВЫЙ  вес действия: {}", newWeight);
+            log.trace("|||-- НАДО ПЕРЕСЧИТЫВАТь");
+
+            // если частная сумма для весоы события уже была расчитана
+            // посчитаем дельту между старым весом и обновлённым и увеличим на неё частную сумму:
+            double deltaWeight = newWeight - oldWeight;
+            commonWeightSumMap.computeIfPresent(eventId, (key, value) -> value + deltaWeight);
+
+            // готовим знаменатель для расчета косинусного схождения - нужно пересчитать частную сумму для весов события
+            commonWeightSumMap.computeIfAbsent(eventId, id ->
+                    actionMatrix.getOrDefault(id, Collections.emptyMap()).values().stream()
+                            .mapToDouble(Double::doubleValue)
+                            // паттерн используется для безопасной обработки случая, когда мапа отсутствует:
+                            .sum());
+
+            log.trace("|||-- ОБЩАЯ СУММА ВЕСОВ для мероприятия: {} =  {}", eventId,
+                    commonWeightSumMap.getOrDefault(eventId, 0.0));
+            log.trace("|||-- ОБЩАЯ СУММА ВЕСОВ для ВСЕХ мероприятий: {} ", commonWeightSumMap);
+
+
+
+        }
+
+
+        return Optional.empty();
+
+    }
+
+
+    private Double getActionWeight(ActionTypeAvro actionTypeAvro) {
         // опрееделим вес для каждого типа действий пользователея
-        Double actionWeight = switch (userActionAvro.getActionType()) {
+        return switch (actionTypeAvro) {
             case VIEW -> actionWeightView;
             case REGISTER -> actionWeightRegister;
             case LIKE -> actionWeightLike;
         };
-        log.trace("|||-- принято в обработку: {}", userActionAvro);
-        log.trace("|||-- вес дейсвия {} равен: {}", userActionAvro.getActionType(), actionWeight);
-
-        // собираем матрицу весов действий пользователей c мероприятиями в виде отображения.
-        // Map<Event, Map<User, Weight>>
-        if (actionMatrix.containsKey(userActionAvro.getEventId())) {
-            Map<Long, Double> userWeightMap = actionMatrix.get(userActionAvro.getEventId());
-            // если событие уже было в матрице, проверяю действия пользователя
-            if (userWeightMap.containsKey(userActionAvro.getUserId())) {
-                log.trace("|||-- <<<<MAX WEIGHT COMPUTED>>>>> такой пользователь {} УЖЕ взаимодейстовал с мероприятием {}",
-                        userActionAvro.getUserId(), userActionAvro.getEventId());
-                log.trace("|||-- СТАРЫЙ  вес действия: {}",
-                        userWeightMap.get(userActionAvro.getUserId()));
-                log.trace("|||-- ТЕКУШЕЕ состояние матрицы события {} -  {}:",userActionAvro.getEventId(), userWeightMap);
-                // теоретически, значение веса может быть NULL
-                if (Objects.nonNull(userWeightMap.get(userActionAvro.getUserId()))) {
-                    // учитывается только действие с максимальным весом
-                    userWeightMap.compute(userActionAvro.getUserId(),
-                            (k, oldWeight) -> Math.max(oldWeight, actionWeight));
-                }
-
-                log.trace("|||-- НОВЫЙ максимальный вес действия: {}",
-                        userWeightMap.get(userActionAvro.getUserId()));
-                log.trace("|||-- НОВОЕ состояние матрицы события {} -  {}:",userActionAvro.getEventId(), userWeightMap);
-            } else {
-                // если это первое действие пользователя с мероприятием - записываю его в отображение
-                userWeightMap.put(userActionAvro.getUserId(), actionWeight);
-                log.trace("|||-- +++++NEW USER++++++ такой пользователь {} еще не взаимодейстовал с мероприятием {}",
-                        userActionAvro.getUserId(), userActionAvro.getEventId());
-                log.trace("|||-- вес действия: {}",
-                        userWeightMap.get(userActionAvro.getUserId()));
-            }
-        } else {
-            // события еще не было в матрице
-            Map<Long, Double> userWeightMap = new HashMap<>();
-            userWeightMap.put(userActionAvro.getUserId(), actionWeight);
-            actionMatrix.put(userActionAvro.getEventId(), userWeightMap);
-            log.trace("|||-- +++++NEW EVENT++++++ такого события {} еще не было в матрице", userActionAvro.getEventId());
-
-        }
-        log.trace("|||-- текущее состояние матрицы всех событий {}", actionMatrix);
-
-
-
-        //TODO реализовать алгоритм вычисления сходства
-        EventSimilarityAvro eventSimilarityAvro = EventSimilarityAvro.newBuilder()
-                .setEventA(RandomGenerator.getDefault().nextLong(100))
-                .setEventB(RandomGenerator.getDefault().nextLong(100))
-                .setScore(RandomGenerator.getDefault().nextDouble(0.999999))
-                .setTimestamp(Instant.now())
-
-                .build();
-
-
-
-        return Optional.of(eventSimilarityAvro);
     }
+
+
 }

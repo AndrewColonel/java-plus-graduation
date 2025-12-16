@@ -37,15 +37,14 @@ public class SimilarityServiceImpl implements SimilarityService {
     // `Map<Event, Map<Event, S_min>>`
     private final Map<Long, Map<Long, Double>> minWeightsSumsMap = new HashMap<>();
 
-
     @Override
     public List<EventSimilarityAvro> similarityProcessing(UserActionAvro userActionAvro) {
         Long eventId = userActionAvro.getEventId();
         Long userId = userActionAvro.getUserId();
         Double actionWeight = getActionWeight(userActionAvro.getActionType());
 
-        log.trace("|||-- принято в обработку: {}", userActionAvro);
-        log.trace("|||-- вес дейсвия {} равен: {}", userActionAvro.getActionType(), actionWeight);
+        log.info("|||-- принято в обработку: {}", userActionAvro);
+        log.info("|||-- вес дейсвия {} равен: {}", userActionAvro.getActionType(), actionWeight);
 
         // 1. Сбор матрицs максимальных весов действий пользователя c мероприятиями
         // Обновляем матрицу весов действий пользователей c мероприятиями в виде отображения. Map<Event, Map<User, Weight>>
@@ -59,14 +58,13 @@ public class SimilarityServiceImpl implements SimilarityService {
         }
 
         userWeightMap.put(userId, newWeight);
-        log.trace("|||-- МАКСИМАЛЬНЫЙ вес обновлён: {} -> {}", oldWeight, newWeight);
+        log.info("|||-- МАКСИМАЛЬНЫЙ вес обновлён: {} -> {}", oldWeight, newWeight);
 
         // посчитаем дельту между старым весом и обновлённым и увеличим на неё частную сумму:
-        // Обновляем общую сумму весов для события
         double delta = newWeight - oldWeight;
         commonWeightSumMap.merge(eventId, delta, Double::sum);
 
-        log.trace("|||-- Общая сумма весов для {}: {}", eventId, commonWeightSumMap.get(eventId));
+        log.info("|||-- Общая сумма весов для {}: {}", eventId, commonWeightSumMap.get(eventId));
 
         List<EventSimilarityAvro> eventSimilarityAvroList = new ArrayList<>();
 
@@ -93,7 +91,7 @@ public class SimilarityServiceImpl implements SimilarityService {
             log.trace("|||-- ЗНАМЕНАТЕЛЬ - ПРОИЗВЕДЕНИЕ КВАДРАТНЫХ КОРНЕЙ ОБЩИХ СУММ ВЕСОВ {} {} -> {}", first, second, denominator);
 
             double cosineSimilarity = (denominator == 0.0) ? 0.0 : numerator / denominator;
-            log.trace("|||-- КОСИНУСНОЕ СХОЖДЕНИЕ -> {}", cosineSimilarity);
+            log.debug("|||-- КОСИНУСНОЕ СХОЖДЕНИЕ -> {}", cosineSimilarity);
 
             eventSimilarityAvroList.add(
                     EventSimilarityAvro.newBuilder()
@@ -102,9 +100,9 @@ public class SimilarityServiceImpl implements SimilarityService {
                             .setScore(cosineSimilarity)
                             .setTimestamp(Instant.now())
                             .build());
-            log.trace("|||-- СУММА МИНИМАЛЬНЫХ ВЕСОВ для мероприятий {} {} -> {}", first, second, numerator);
+            log.debug("|||-- СУММА МИНИМАЛЬНЫХ ВЕСОВ для мероприятий {} {} -> {}", first, second, numerator);
         }
-        log.trace("|||-- Список AVRO -> {}", eventSimilarityAvroList);
+        log.debug("|||-- Список AVRO -> {}", eventSimilarityAvroList);
         return eventSimilarityAvroList;
     }
 
@@ -117,6 +115,7 @@ public class SimilarityServiceImpl implements SimilarityService {
                 })
                 .sum();
     }
+
     private Double getActionWeight(ActionTypeAvro actionTypeAvro) {
         // опрееделим вес для каждого типа действий пользователея
         return switch (actionTypeAvro) {

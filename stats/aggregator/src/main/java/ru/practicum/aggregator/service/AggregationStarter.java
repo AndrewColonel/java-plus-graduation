@@ -139,16 +139,16 @@ public class AggregationStarter implements Runnable {
         log.info("<<< Получено сообщение топика = {}, партиция = {}, смещение = {}, значение: {}\n",
                 record.topic(), record.partition(), record.offset(), record.value());
         if (record.value() instanceof UserActionAvro userActionAvro) {
-            Optional<EventSimilarityAvro> optionalEventSimilarityAvro = similarityService.similarityProcessing(userActionAvro);
+           List<EventSimilarityAvro>  EventSimilarityAvroList = similarityService.similarityProcessing(userActionAvro);
             // если снапшот сформирован, то его надо отправить в брокер
-            optionalEventSimilarityAvro.ifPresentOrElse(s -> {
+
+            if (EventSimilarityAvroList.isEmpty())   log.info("<--- Сходство не было расчитано --->");
+            EventSimilarityAvroList.forEach(eventSimilarityAvro -> {
                         ProducerRecord<String, SpecificRecordBase> producerRecord =
-                                new ProducerRecord<>(topicProducer, s);
-                        log.info(">>> Расчитано сходство мероприятий {} для отправки в топик {}", s, topicProducer);
+                                new ProducerRecord<>(topicProducer, eventSimilarityAvro);
+                        log.info(">>> Расчитано сходство мероприятий {} для отправки в топик {}",
+                                eventSimilarityAvro, topicProducer);
                         producer.send(producerRecord);
-                    },
-                    () -> {
-                        log.info("<--- Сходство не было расчитано --->");
                     });
         }
     }

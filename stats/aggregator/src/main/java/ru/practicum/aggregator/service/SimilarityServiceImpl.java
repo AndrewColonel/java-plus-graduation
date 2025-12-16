@@ -10,6 +10,7 @@ import ru.practicum.ewm.stats.avro.UserActionAvro;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,7 +38,6 @@ public class SimilarityServiceImpl implements SimilarityService {
     // а значением — ещё одно отображение, где ключ — второе мероприятие, а значение — сумма их минимальных весов:
     // `Map<Event, Map<Event, S_min>>`
     private final Map<Long, Map<Long, Double>> minWeightsSumsMap = new HashMap<>();
-
 
 
     @Override
@@ -92,41 +92,60 @@ public class SimilarityServiceImpl implements SimilarityService {
 
             // Готовим числитель - сумма минимальных весов для каждой пары мероприятий.
             for (Map.Entry<Long, Map<Long, Double>> actionMatrixEntry : actionMatrix.entrySet()) {
-
                 // пропускаем равный ID мероприятия
                 if (actionMatrixEntry.getKey().equals(eventId)) continue;
-
                 double minSum = 0.0;
-
                 for (Map.Entry<Long, Double> userWeightEntry : userWeightMap.entrySet()) {
-
                     minSum += Math.min(userWeightEntry.getValue(), actionMatrixEntry.getValue().getOrDefault(userWeightEntry.getKey(), 0.0));
                 }
-
                 put(eventId, actionMatrixEntry.getKey(), minSum);
                 log.trace("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
                 log.trace("|||-- СУММА МИНИМАЛЬНЫХ ВЕСОВ для  мероприятий {} {} -> {}", eventId, actionMatrixEntry.getKey(), minSum);
 
+
+                if (minSum == 0.0)  return Optional.empty();
+                //расчет косинусного схождения
+                double denominator = Math.sqrt(commonWeightSumMap.getOrDefault(eventId, 0.0))
+                        * Math.sqrt(commonWeightSumMap.getOrDefault(actionMatrixEntry.getKey(), 0.0));
+
+                log.trace("|||-- ПРОИЗВЕДЕНИЕ КВАДРАТНЫХ КОРНЕЙ ЩБЩИХ СУММ ВЕСОВ {} {} -> {}", eventId, actionMatrixEntry.getKey(), denominator);
+
+                double cosineSimilarity = (denominator == 0.0) ? 0.0 : minSum / denominator;
+                log.trace("|||-- КОСИНУСНОЕ СХОЖДЕНИЕ -> {}", cosineSimilarity);
+
+
+                EventSimilarityAvro eventSimilarityAvro = EventSimilarityAvro.newBuilder()
+                        .setEventA(eventId)
+                        .setEventB(actionMatrixEntry.getKey())
+                        .setScore(cosineSimilarity)
+                        .setTimestamp(Instant.now())
+                        .build();
+
+                return Optional.of(eventSimilarityAvro);
+
             }
 
-            log.trace("|||-- СУММА МИНИМАЛЬНЫХ ВЕСОВ для ВСЕХ мероприятий -- |||");
 
-            for (Map.Entry<Long, Map<Long, Double>> minWeightsSumsMapEntry : minWeightsSumsMap.entrySet()) {
-                log.trace("|||-- для {} и {}",minWeightsSumsMapEntry.getKey(), minWeightsSumsMapEntry.getValue());
-            }
 
+//            log.trace("|||-- СУММА МИНИМАЛЬНЫХ ВЕСОВ для ВСЕХ мероприятий -- |||");
+//            for (Map.Entry<Long, Map<Long, Double>> minWeightsSumsMapEntry : minWeightsSumsMap.entrySet()) {
+//                log.trace("|||-- для {} и {}", minWeightsSumsMapEntry.getKey(), minWeightsSumsMapEntry.getValue());
+//            }
+
+        } else {
+            log.trace("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+            log.trace("|||-- СТАРЫЙ  вес действия: {}", oldWeight);
+            log.trace("|||-- НОВЫЙ  вес действия: {}", newWeight);
+            log.trace("|||-- НЕ НАДО ПЕРЕСЧИТЫВАТь ДЛЯ СОБЫТИЯ {}", eventId);
+            return Optional.empty();
         }
 
-        EventSimilarityAvro eventSimilarityAvro = EventSimilarityAvro.newBuilder()
-                .setEventA()
-                .setEventB()
-                .setScore()
-                .setTimestamp()
-                .build();
+
+
         return Optional.empty();
 
-    }
 
+    }
 
 
     // вспомогательные методы
@@ -136,10 +155,8 @@ public class SimilarityServiceImpl implements SimilarityService {
 //    }
 
 
-
-
     public void put(long eventA, long eventB, double sum) {
-        long first  = Math.min(eventA, eventB);
+        long first = Math.min(eventA, eventB);
         long second = Math.max(eventA, eventB);
 
         minWeightsSumsMap
@@ -148,7 +165,7 @@ public class SimilarityServiceImpl implements SimilarityService {
     }
 
     public double get(long eventA, long eventB) {
-        long first  = Math.min(eventA, eventB);
+        long first = Math.min(eventA, eventB);
         long second = Math.max(eventA, eventB);
 
         return minWeightsSumsMap

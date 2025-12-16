@@ -77,7 +77,7 @@ public class SimilarityServiceImpl implements SimilarityService {
             double deltaWeight = newWeight - oldWeight;
             commonWeightSumMap.computeIfPresent(eventId, (key, value) -> value + deltaWeight);
 
-            // готовим знаменатель для расчета косинусного схождения - нужно пересчитать частную сумму для весов события
+            // для расчета косинусного схождения - нужно пересчитать частную сумму для весов события
             commonWeightSumMap.computeIfAbsent(eventId, id ->
                     actionMatrix.getOrDefault(id, Collections.emptyMap()).values().stream()
                             .mapToDouble(Double::doubleValue)
@@ -88,166 +88,53 @@ public class SimilarityServiceImpl implements SimilarityService {
                     commonWeightSumMap.getOrDefault(eventId, 0.0));
             log.trace("|||-- ОБЩАЯ СУММА ВЕСОВ для ВСЕХ мероприятий: {} ", commonWeightSumMap);
 
-
-            // Готовим числитель - сумма минимальных весов для каждой пары мероприятий.
+            // сумма минимальных весов для каждой пары мероприятий.
             List<EventSimilarityAvro> eventSimilarityAvroList = new ArrayList<>();
             for (Map.Entry<Long, Map<Long, Double>> actionMatrixEntry : actionMatrix.entrySet()) {
                 // пропускаем равный самому себе ID мероприятия
                 if (actionMatrixEntry.getKey().equals(eventId)) continue;
 
                 //пропускаем событие с которым этот пользователь не взаимодейстовал
-                if (!actionMatrixEntry.getValue().containsKey(userId)) continue;;
-
-                double numerator = 0.0;
-                for (Map.Entry<Long, Double> userWeightEntry : userWeightMap.entrySet()) {
-                    numerator += Math.min(userWeightEntry.getValue(), actionMatrixEntry.getValue().getOrDefault(userWeightEntry.getKey(), 0.0));
-                }
+                if (!actionMatrixEntry.getValue().containsKey(userId)) continue;
 
                 long first = Math.min(eventId, actionMatrixEntry.getKey());
                 long second = Math.max(eventId, actionMatrixEntry.getKey());
 
+                // Готовим числитель
+                double numerator = userWeightMap.entrySet().stream().mapToDouble(entry ->
+                                Math.min(entry.getValue(),
+                                        actionMatrixEntry.getValue().getOrDefault(entry.getKey(), 0.0)))
+                        .sum();
+                log.trace("|||-- ЧИСЛИТЕЛЬ - ОБЩАЯ СУММА ВЕСОВ для {} и {} -> {}", first, second, numerator);
 
-                log.trace("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+                // готовим знаменатель
+                double denominator = Math.sqrt(commonWeightSumMap.getOrDefault(first, 0.0))
+                        * Math.sqrt(commonWeightSumMap.getOrDefault(second, 0.0));
+
+                log.trace("|||-- ЗНАМЕНАТЕЛЬ - ПРОИЗВЕДЕНИЕ КВАДРАТНЫХ КОРНЕЙ ОБЩИХ СУММ ВЕСОВ {} {} -> {}", first, second, denominator);
+
+                double cosineSimilarity = (denominator == 0.0) ? 0.0 : numerator / denominator;
+                log.trace("|||-- КОСИНУСНОЕ СХОЖДЕНИЕ -> {}", cosineSimilarity);
+
+                eventSimilarityAvroList.add(
+                        EventSimilarityAvro.newBuilder()
+                                .setEventA(first)
+                                .setEventB(second)
+                                .setScore(cosineSimilarity)
+                                .setTimestamp(Instant.now())
+                                .build());
+
+                log.trace("|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
                 log.trace("|||-- СУММА МИНИМАЛЬНЫХ ВЕСОВ для мероприятий {} {} -> {}", first, second, numerator);
-
-
-                    double denominator = Math.sqrt(commonWeightSumMap.getOrDefault(first, 0.0))
-                            * Math.sqrt(commonWeightSumMap.getOrDefault(second, 0.0));
-
-                    log.trace("|||-- ПРОИЗВЕДЕНИЕ КВАДРАТНЫХ КОРНЕЙ ОБЩИХ СУММ ВЕСОВ {} {} -> {}", first, second, denominator);
-
-                    double cosineSimilarity = (denominator == 0.0) ? 0.0 : numerator / denominator;
-                    log.trace("|||-- КОСИНУСНОЕ СХОЖДЕНИЕ -> {}", cosineSimilarity);
-
-                    eventSimilarityAvroList.add(
-                            EventSimilarityAvro.newBuilder()
-                                    .setEventA(first)
-                                    .setEventB(second)
-                                    .setScore(cosineSimilarity)
-                                    .setTimestamp(Instant.now())
-                                    .build());
-
-
-                log.trace("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
-                log.trace("|||-- СУММА МИНИМАЛЬНЫХ ВЕСОВ для мероприятий {} {} -> {}", first, second, numerator);
-                log.trace("|||-- Список AVRO -> {}", eventSimilarityAvroList);
-
-
-
-
-//                if (numerator == 0.0) {
-//                    log.trace("|||-- дальнейший пересчет НЕ ТРЕБУЕТСЯ");
-//                    continue;
-//                }
-//                put(eventId, actionMatrixEntry.getKey(), numerator);
-
-
             }
-
-//            log.trace("|||-- СУММА МИНИМАЛЬНЫХ ВЕСОВ для ВСЕХ мероприятий -- |||");
-//            for (Map.Entry<Long, Map<Long, Double>> minWeightsSumsMapEntry : minWeightsSumsMap.entrySet()) {
-//                log.trace("|||-- для {} и {}", minWeightsSumsMapEntry.getKey(), minWeightsSumsMapEntry.getValue());
-//            }
-
-
-            //расчет косинусного схождения
-//            List<EventSimilarityAvro> eventSimilarityAvroList = new ArrayList<>();
-//            for (Map.Entry<Long, Map<Long, Double>> firstMinWeightSumEntry : minWeightsSumsMap.entrySet()) {
-//                Long eventA = firstMinWeightSumEntry.getKey();
-//
-//                for (Map.Entry<Long, Double> secondMinWeightSumEntry : firstMinWeightSumEntry.getValue().entrySet()) {
-//                    Long eventB = secondMinWeightSumEntry.getKey();
-//                    Double numerator = secondMinWeightSumEntry.getValue();
-//
-//                    double denominator = Math.sqrt(commonWeightSumMap.getOrDefault(eventA, 0.0))
-//                            * Math.sqrt(commonWeightSumMap.getOrDefault(eventB, 0.0));
-//
-//                    log.trace("|||-- ПРОИЗВЕДЕНИЕ КВАДРАТНЫХ КОРНЕЙ ОБЩИХ СУММ ВЕСОВ {} {} -> {}", eventA, eventB, denominator);
-//
-//                    double cosineSimilarity = (denominator == 0.0) ? 0.0 : numerator / denominator;
-//                    log.trace("|||-- КОСИНУСНОЕ СХОЖДЕНИЕ -> {}", cosineSimilarity);
-//
-//                    eventSimilarityAvroList.add(
-//                            EventSimilarityAvro.newBuilder()
-//                                    .setEventA(eventA)
-//                                    .setEventB(eventB)
-//                                    .setScore(cosineSimilarity)
-//                                    .setTimestamp(Instant.now())
-//                                    .build());
-//
-//
-//                }
-//            }
-
+            log.trace("|||-- Список AVRO -> {}", eventSimilarityAvroList);
             return eventSimilarityAvroList;
 
-//            log.trace("|||-- СУММА МИНИМАЛЬНЫХ ВЕСОВ для ВСЕХ мероприятий -- |||");
-//            for (Map.Entry<Long, Map<Long, Double>> minWeightsSumsMapEntry : minWeightsSumsMap.entrySet()) {
-//                log.trace("|||-- для {} и {}", minWeightsSumsMapEntry.getKey(), minWeightsSumsMapEntry.getValue());
-//            }
-
-        } else {
-            log.trace("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
-            log.trace("|||-- СТАРЫЙ  вес действия: {}", oldWeight);
-            log.trace("|||-- НОВЫЙ  вес действия: {}", newWeight);
-            log.trace("|||-- НЕ НАДО ПЕРЕСЧИТЫВАТь ДЛЯ СОБЫТИЯ {}", eventId);
-
         }
-
-
         return List.of();
-
-
     }
-
 
     // вспомогательные методы
-
-
-    private Optional<EventSimilarityAvro> calculateCosineSimilarity(Long eventA, Long eventB, Double numerator) {
-
-        long first = Math.min(eventA, eventB);
-        long second = Math.max(eventA, eventB);
-
-        double denominator = Math.sqrt(commonWeightSumMap.getOrDefault(first, 0.0))
-                * Math.sqrt(commonWeightSumMap.getOrDefault(second, 0.0));
-
-        log.trace("|||-- ПРОИЗВЕДЕНИЕ КВАДРАТНЫХ КОРНЕЙ ОБЩИХ СУММ ВЕСОВ {} {} -> {}", first, second, denominator);
-
-        double cosineSimilarity = (denominator == 0.0) ? 0.0 : numerator / denominator;
-        log.trace("|||-- КОСИНУСНОЕ СХОЖДЕНИЕ -> {}", cosineSimilarity);
-
-
-        EventSimilarityAvro eventSimilarityAvro = EventSimilarityAvro.newBuilder()
-                .setEventA(first)
-                .setEventB(second)
-                .setScore(cosineSimilarity)
-                .setTimestamp(Instant.now())
-                .build();
-
-        return Optional.of(eventSimilarityAvro);
-    }
-
-
-    public void put(long eventA, long eventB, double sum) {
-        long first = Math.min(eventA, eventB);
-        long second = Math.max(eventA, eventB);
-
-        minWeightsSumsMap
-                .computeIfAbsent(first, e -> new HashMap<>())
-                .put(second, sum);
-    }
-
-    public double get(long eventA, long eventB) {
-        long first = Math.min(eventA, eventB);
-        long second = Math.max(eventA, eventB);
-
-        return minWeightsSumsMap
-                .computeIfAbsent(first, e -> new HashMap<>())
-                .getOrDefault(second, 0.0);
-    }
-
-
     private Double getActionWeight(ActionTypeAvro actionTypeAvro) {
         // опрееделим вес для каждого типа действий пользователея
         return switch (actionTypeAvro) {
@@ -256,6 +143,4 @@ public class SimilarityServiceImpl implements SimilarityService {
             case LIKE -> actionWeightLike;
         };
     }
-
-
 }

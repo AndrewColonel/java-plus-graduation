@@ -26,11 +26,19 @@ public class SimilarityServiceImpl implements SimilarityService {
     private Double actionWeightLike;
 
     // матрица весов Map<Event, Map<User, Weight>>
-    private final Map<Long, Map<Long, Double>> actionMatrix = new TreeMap<>();
+    private final Map<Long, Map<Long, Double>> actionMatrix = new HashMap<>();
+
     // общие суммы весов каждого из мероприятий, где ключ — мероприятие,
     // а значение — сумма весов действий пользователей с ним.
     // Map<Event,SUM Weight>
     private final Map<Long, Double> commonWeightSumMap = new HashMap<>();
+
+    // сумма минимальных весов для каждой пары мероприятий. Тогда ключом будет одно из мероприятий,
+    // а значением — ещё одно отображение, где ключ — второе мероприятие, а значение — сумма их минимальных весов:
+    // `Map<Event, Map<Event, S_min>>`
+    private final Map<Long, Map<Long, Double>> minWeightsSumsMap = new HashMap<>();
+
+
 
     @Override
     public Optional<EventSimilarityAvro> similarityProcessing(UserActionAvro userActionAvro) {
@@ -63,7 +71,7 @@ public class SimilarityServiceImpl implements SimilarityService {
             log.trace("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
             log.trace("|||-- СТАРЫЙ  вес действия: {}", oldWeight);
             log.trace("|||-- НОВЫЙ  вес действия: {}", newWeight);
-            log.trace("|||-- НАДО ПЕРЕСЧИТЫВАТь");
+            log.trace("|||-- НАДО ПЕРЕСЧИТЫВАТь ДЛЯ СОБЫТИЯ {}", eventId);
 
             // если частная сумма для весоы события уже была расчитана
             // посчитаем дельту между старым весом и обновлённым и увеличим на неё частную сумму:
@@ -82,12 +90,70 @@ public class SimilarityServiceImpl implements SimilarityService {
             log.trace("|||-- ОБЩАЯ СУММА ВЕСОВ для ВСЕХ мероприятий: {} ", commonWeightSumMap);
 
 
+            // Готовим числитель - сумма минимальных весов для каждой пары мероприятий.
+            for (Map.Entry<Long, Map<Long, Double>> actionMatrixEntry : actionMatrix.entrySet()) {
+
+                // пропускаем равный ID мероприятия
+                if (actionMatrixEntry.getKey().equals(eventId)) continue;
+
+                double minSum = 0.0;
+
+                for (Map.Entry<Long, Double> userWeightEntry : userWeightMap.entrySet()) {
+
+                    minSum += Math.min(userWeightEntry.getValue(), actionMatrixEntry.getValue().getOrDefault(userWeightEntry.getKey(), 0.0));
+                }
+
+                put(eventId, actionMatrixEntry.getKey(), minSum);
+                log.trace("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+                log.trace("|||-- СУММА МИНИМАЛЬНЫХ ВЕСОВ для  мероприятий {} {} -> {}", eventId, actionMatrixEntry.getKey(), minSum);
+
+            }
+
+            log.trace("|||-- СУММА МИНИМАЛЬНЫХ ВЕСОВ для ВСЕХ мероприятий -- |||");
+
+            for (Map.Entry<Long, Map<Long, Double>> minWeightsSumsMapEntry : minWeightsSumsMap.entrySet()) {
+                log.trace("|||-- для {} и {}",minWeightsSumsMapEntry.getKey(), minWeightsSumsMapEntry.getValue());
+            }
 
         }
 
-
+        EventSimilarityAvro eventSimilarityAvro = EventSimilarityAvro.newBuilder()
+                .setEventA()
+                .setEventB()
+                .setScore()
+                .setTimestamp()
+                .build();
         return Optional.empty();
 
+    }
+
+
+
+    // вспомогательные методы
+
+//    private Optional<EventSimilarityAvro> calculateCosineSimilarity() {
+//
+//    }
+
+
+
+
+    public void put(long eventA, long eventB, double sum) {
+        long first  = Math.min(eventA, eventB);
+        long second = Math.max(eventA, eventB);
+
+        minWeightsSumsMap
+                .computeIfAbsent(first, e -> new HashMap<>())
+                .put(second, sum);
+    }
+
+    public double get(long eventA, long eventB) {
+        long first  = Math.min(eventA, eventB);
+        long second = Math.max(eventA, eventB);
+
+        return minWeightsSumsMap
+                .computeIfAbsent(first, e -> new HashMap<>())
+                .getOrDefault(second, 0.0);
     }
 
 

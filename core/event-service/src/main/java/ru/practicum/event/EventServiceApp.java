@@ -16,7 +16,11 @@ import ru.practicum.logging.LoggingAspect;
 
 
 @SpringBootApplication
-@Import({ApiExceptionHandler.class, LoggingAspect.class, CollectorClient.class, RecomendationsClient.class, JacksonConfig.class})
+@Import({ApiExceptionHandler.class,
+        LoggingAspect.class,
+        CollectorClient.class,
+        RecomendationsClient.class,
+        JacksonConfig.class})
 @EnableFeignClients(clients = {UserClient.class, CategoryClient.class,
 RequestClient.class})
 public class EventServiceApp {

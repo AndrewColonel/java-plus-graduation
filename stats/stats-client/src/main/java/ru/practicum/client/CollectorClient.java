@@ -2,7 +2,6 @@ package ru.practicum.client;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Timestamp;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Component;
@@ -15,11 +14,11 @@ import java.time.Instant;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
+
 public class CollectorClient {
 
     @GrpcClient("collector")
-    private final UserActionControllerGrpc.UserActionControllerBlockingStub client;
+    private UserActionControllerGrpc.UserActionControllerBlockingStub client;
 
     public void collectUserAction(Long userId, Long eventId, String actionType) {
         UserActionProto request = UserActionProto.newBuilder()

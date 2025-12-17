@@ -21,8 +21,10 @@ import ru.practicum.logging.LoggingAspect;
         CollectorClient.class,
         RecomendationsClient.class,
         JacksonConfig.class})
-@EnableFeignClients(clients = {UserClient.class, CategoryClient.class,
-RequestClient.class})
+@EnableFeignClients(clients = {
+        UserClient.class,
+        CategoryClient.class,
+        RequestClient.class})
 public class EventServiceApp {
     public static void main(String[] args) {
         SpringApplication.run(EventServiceApp.class, args);

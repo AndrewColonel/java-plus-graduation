@@ -14,7 +14,6 @@ import java.time.Instant;
 
 @Slf4j
 @Component
-
 public class CollectorClient {
 
     @GrpcClient("collector")

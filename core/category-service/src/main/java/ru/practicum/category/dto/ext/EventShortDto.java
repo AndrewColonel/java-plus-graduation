@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 import java.time.LocalDateTime;
 
 @Data
@@ -21,5 +20,5 @@ public class EventShortDto implements BaseDto {
     private UserShortDto initiator;
     private Boolean paid;
     private String title;
-    private Long views;
+    private Double rating;
 }

@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 import java.time.LocalDateTime;
 
 @Data
@@ -28,5 +27,5 @@ public class EventFullDto implements BaseDto {
     private Boolean requestModeration;
     private State state;
     private String title;
-    private Long views;
+    private Double rating;
 }

@@ -71,6 +71,43 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public List<EventShortDto> getAllEvents(RequestPublicParams params) {
+        if (params.getRangeStart() != null && params.getRangeEnd() != null
+                && params.getRangeStart().isAfter(params.getRangeEnd())) {
+            throw new ValidationException("rangeStart must not be after rangeEnd");
+        }
+        Pageable pageable;
+
+        if (params.getEventSort() == EventSort.EVENT_DATE) {
+            pageable = PageRequest.of(params.getFrom() / params.getSize(), params.getSize(),
+                    Sort.by("eventDate").descending());
+        } else {
+            pageable = PageRequest.of(params.getFrom() / params.getSize(), params.getSize());
+        }
+
+        Specification<Event> spec = EventSpecification.byParams(params);
+
+        List<Event> eventList = eventRepository.findAll(spec, pageable).getContent();
+
+        Map<Long, CategoryDto> categoryDtoMap = getCategoryDtoMap(eventList);
+        Map<Long, UserShortDto> userShortDtoMap = getUserShotDtoMap(eventList);
+
+        List<EventShortDto> dtos = eventList.stream()
+                .map(event -> toEventShortDto(event, categoryDtoMap, userShortDtoMap))
+                .toList();
+
+        setViewsAndConfirmedRequests(dtos);
+
+        if (params.getEventSort() != EventSort.EVENT_DATE) {
+            dtos = dtos.stream()
+                    .sorted(Comparator.comparing(EventShortDto::getRating).reversed())
+                    .toList();
+        }
+
+        return dtos;
+    }
+
+    @Override
     public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest request) {
         Event event = getEventById(eventId);
         log.info(">>> PATCH updateEvent called for eventId={}, state={}", eventId, getEventById(eventId).getState());

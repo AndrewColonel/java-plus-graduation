@@ -128,7 +128,9 @@ public class RecommendationServiceImpl implements RecommendationService {
         // собираю мапу пользовательских оценок
         Map<Long, Double> userRatings = interactionRepository.findByEventIdIn(allUserEventIds.stream().toList())
                 .stream()
-                .collect(Collectors.toMap(Interaction::getEventId, Interaction::getRating));
+                .collect(Collectors.toMap(Interaction::getEventId,
+                        Interaction::getRating,
+                        Double::max));
 
 
         // c. Вычисляем оценки

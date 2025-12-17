@@ -44,7 +44,7 @@ public class PublicEventController {
     public List<RecommendedEventDto> getRecommendations(
             @RequestHeader("X-EWM-USER-ID")
             @Positive long userId,
-            @RequestParam(value = "maxResults", required = false, defaultValue = "10")
+            @RequestParam(value = "maxResults", defaultValue = "10")
             @Positive int maxResults) {
         return eventService.getRecommendations(userId, maxResults);
     }

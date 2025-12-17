@@ -1,5 +1,6 @@
 package ru.practicum.client;
 
+import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Component;
@@ -16,17 +17,29 @@ import java.util.stream.StreamSupport;
 @Component
 public class RecomendationsClient {
 
-    @GrpcClient("analyzer")
-    private RecommendationsControllerGrpc.RecommendationsControllerBlockingStub client;
+    private final RecommendationsControllerGrpc.RecommendationsControllerBlockingStub client;
+
+    public RecomendationsClient(@GrpcClient("analyzer")
+                                RecommendationsControllerGrpc.RecommendationsControllerBlockingStub client) {
+        this.client = client;
+    }
 
     public Stream<RecommendedEventProto> getRecommendationsForUser(long userId, int maxResults) {
         UserPredictionsRequestProto request = UserPredictionsRequestProto.newBuilder()
                 .setUserId(userId)
                 .setMaxResults(maxResults)
                 .build();
-//        Iterator<RecommendedEventProto> iterator = client.getRecommendationsForUser(request);
-//        return asStream(iterator);
-        return Stream.empty();
+
+        try {
+            log.debug("Запрос получения рекоментдаций для пользователя userId={}, maxResult={}",
+                    userId, maxResults);
+            Iterator<RecommendedEventProto> iterator = client.getRecommendationsForUser(request);
+            return asStream(iterator);
+        } catch (
+                StatusRuntimeException e) {
+            log.error("Ошибка gRPC при вызове getRecommendationsForUser для userId={}", userId, e);
+            return Stream.empty();
+        }
     }
 
     public Stream<RecommendedEventProto> getSimilarEvents(long eventId, long userId, int maxResults) {
@@ -38,20 +51,32 @@ public class RecomendationsClient {
 
         // gRPC-метод getSimilarEvents возвращает Iterator, потому что в его схеме
         // мы указали, что он должен вернуть поток сообщений (stream stats.message.RecommendedEventProto)
-//        Iterator<RecommendedEventProto> iterator = client.getSimilarEvents(request);
-//
-//        // преобразуем Iterator в Stream
-//        return asStream(iterator);
-        return Stream.empty();
+        try {
+            log.debug("запрос на макисмально похожие на мероприятие: eventId={}", eventId);
+            Iterator<RecommendedEventProto> iterator = client.getSimilarEvents(request);
+            // преобразуем Iterator в Stream
+            return asStream(iterator);
+        } catch (
+                StatusRuntimeException e) {
+            log.error("Ошибка gRPC при запрос на макисмально похожие на мероприятие: eventId={}", eventId, e);
+            return Stream.empty();
+        }
     }
 
     public Stream<RecommendedEventProto> getInteractionsCount(List<Long> eventIds) {
         InteractionsCountRequestProto request = InteractionsCountRequestProto.newBuilder()
                 .addAllEventId(eventIds)
                 .build();
-//        Iterator<RecommendedEventProto> iterator = client.getInteractionsCount(request);
-//        return asStream(iterator);
-        return Stream.empty();
+        try {
+            log.debug("запрос на подсчёт максимальных весов для списка мероприятий: List<eventId>={}", eventIds);
+            Iterator<RecommendedEventProto> iterator = client.getInteractionsCount(request);
+            return asStream(iterator);
+        } catch (
+                StatusRuntimeException e) {
+            log.error("Ошибка gRPC при запрос на подсчёт максимальных весов для списка мероприятий: List<eventId>={}",
+                    eventIds, e);
+            return Stream.empty();
+        }
     }
 
 

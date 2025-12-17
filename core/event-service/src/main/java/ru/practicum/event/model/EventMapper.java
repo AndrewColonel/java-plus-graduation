@@ -56,7 +56,7 @@ public class EventMapper {
                 .publishedOn(event.getPublishedOn())
                 .location(event.getLocation())
                 .requestModeration(event.getRequestModeration())
-                .views(0L)
+                .rating(0.0)
                 .confirmedRequests(0L)
                 .build();
     }
@@ -78,7 +78,7 @@ public class EventMapper {
                 .publishedOn(event.getPublishedOn())
                 .location(event.getLocation())
                 .requestModeration(event.getRequestModeration())
-                .views(0L)
+                .rating(0.0)
                 .confirmedRequests(0L)
                 .build();
     }

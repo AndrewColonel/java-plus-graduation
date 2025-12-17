@@ -11,7 +11,6 @@ import ru.practicum.event.model.RequestPublicParams;
 import ru.practicum.logging.Loggable;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/events")
@@ -24,10 +23,8 @@ public class PublicEventController {
     @Loggable
     @GetMapping
     public List<EventShortDto> getEvents(
-            @ModelAttribute RequestPublicParams params,
-            HttpServletRequest request
-    ) {
-        return eventService.getAllEvents(params, request);
+            @ModelAttribute RequestPublicParams params) {
+        return eventService.getAllEvents(params);
     }
 
     @Loggable

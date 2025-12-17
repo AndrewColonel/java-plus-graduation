@@ -21,11 +21,11 @@ public class CollectorClient {
     @GrpcClient("collector")
     private final UserActionControllerGrpc.UserActionControllerBlockingStub client;
 
-    public void collectUserAction(Long userId, Long eventId, ActionTypeProto actionType) {
+    public void collectUserAction(Long userId, Long eventId, String actionType) {
         UserActionProto request = UserActionProto.newBuilder()
                 .setUserId(userId)
                 .setEventId(eventId)
-                .setActionType(actionType)
+                .setActionType(ActionTypeProto.valueOf(actionType))
                 .setTimestamp(Timestamp.newBuilder()
                         .setSeconds(Instant.now().getEpochSecond())
                         .setNanos(Instant.now().getNano())

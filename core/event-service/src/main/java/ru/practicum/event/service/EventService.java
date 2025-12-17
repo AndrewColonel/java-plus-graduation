@@ -4,9 +4,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.dto.ext.EventRequestStatusUpdateRequest;
 import ru.practicum.event.dto.ext.EventRequestStatusUpdateResult;
+import ru.practicum.event.dto.ext.RecommendedEventDto;
 import ru.practicum.event.dto.ext.RequestDto;
 import ru.practicum.event.model.RequestAdminParams;
 import ru.practicum.event.model.RequestPublicParams;
+import ru.practicum.ewm.stats.proto.RecommendedEventProto;
 
 import java.util.List;
 import java.util.Set;
@@ -40,4 +42,8 @@ public interface EventService {
     EventRequestStatusUpdateResult changeRequestStatus(Long userId, Long eventId, EventRequestStatusUpdateRequest req);
 
     Set<EventShortDto> getEventByIdIn(List<Long> eventIds);
+
+    List<RecommendedEventDto> getRecommendations(Long userId, Integer maxResults);
+
+    void collectUserAction(Long userId, Long eventId);
 }

@@ -28,7 +28,6 @@ public class RecomendationsClient {
         return asStream(iterator);
     }
 
-
     public Stream<RecommendedEventProto> getSimilarEvents(long eventId, long userId, int maxResults) {
         SimilarEventsRequestProto request = SimilarEventsRequestProto.newBuilder()
                 .setEventId(eventId)

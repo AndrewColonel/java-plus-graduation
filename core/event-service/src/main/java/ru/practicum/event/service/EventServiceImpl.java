@@ -380,6 +380,22 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toSet());
     }
 
+    @Override
+    public List<RecommendedEventDto> getRecommendations(Long userId, Integer maxResults) {
+        return recomendationsClient.getRecommendationsForUser(userId, maxResults)
+                .map(EventMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public void collectUserAction(Long userId, Long eventId) {
+        RequestDto requestDto = requestClient.getEventRequests(eventId).stream()
+                .filter(r -> r.getEvent().equals(eventId)
+                        && r.getRequester().equals(userId)).findFirst()
+                .orElseThrow(() -> new ValidationException(
+                        String.format("Пользователь %s не запрашивал мероприятие %s", userId, eventId)));
+        collectorClient.collectUserAction(userId, eventId, "ACTION_LIKE");
+    }
 
     private Event getEventById(Long eventId) {
         return eventRepository.findById(eventId)

@@ -31,8 +31,8 @@ public class CollectorClient {
                 .build();
 
         log.trace("Отправляю данные: {}", request.getAllFields());
-        Empty response = client.collectUserAction(request);
-        log.trace("Получил ответ от коллектора: {}", response);
+//        Empty response = client.collectUserAction(request);
+//        log.trace("Получил ответ от коллектора: {}", response);
     }
 
 }

@@ -24,8 +24,9 @@ public class RecomendationsClient {
                 .setUserId(userId)
                 .setMaxResults(maxResults)
                 .build();
-        Iterator<RecommendedEventProto> iterator = client.getRecommendationsForUser(request);
-        return asStream(iterator);
+//        Iterator<RecommendedEventProto> iterator = client.getRecommendationsForUser(request);
+//        return asStream(iterator);
+        return Stream.empty();
     }
 
     public Stream<RecommendedEventProto> getSimilarEvents(long eventId, long userId, int maxResults) {
@@ -37,18 +38,20 @@ public class RecomendationsClient {
 
         // gRPC-метод getSimilarEvents возвращает Iterator, потому что в его схеме
         // мы указали, что он должен вернуть поток сообщений (stream stats.message.RecommendedEventProto)
-        Iterator<RecommendedEventProto> iterator = client.getSimilarEvents(request);
-
-        // преобразуем Iterator в Stream
-        return asStream(iterator);
+//        Iterator<RecommendedEventProto> iterator = client.getSimilarEvents(request);
+//
+//        // преобразуем Iterator в Stream
+//        return asStream(iterator);
+        return Stream.empty();
     }
 
     public Stream<RecommendedEventProto> getInteractionsCount(List<Long> eventIds) {
         InteractionsCountRequestProto request = InteractionsCountRequestProto.newBuilder()
                 .addAllEventId(eventIds)
                 .build();
-        Iterator<RecommendedEventProto> iterator = client.getInteractionsCount(request);
-        return asStream(iterator);
+//        Iterator<RecommendedEventProto> iterator = client.getInteractionsCount(request);
+//        return asStream(iterator);
+        return Stream.empty();
     }
 
 

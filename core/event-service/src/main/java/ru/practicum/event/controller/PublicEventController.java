@@ -10,7 +10,6 @@ import ru.practicum.event.service.EventService;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.model.RequestPublicParams;
-import ru.practicum.ewm.stats.proto.RecommendedEventProto;
 import ru.practicum.logging.Loggable;
 
 import java.util.List;

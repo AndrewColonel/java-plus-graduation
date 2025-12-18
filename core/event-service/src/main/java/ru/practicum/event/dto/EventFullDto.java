@@ -35,5 +35,5 @@ public class EventFullDto implements BaseDto {
     private Boolean requestModeration;
     private State state;
     private String title;
-    private Long views;
+    private Double rating;
 }

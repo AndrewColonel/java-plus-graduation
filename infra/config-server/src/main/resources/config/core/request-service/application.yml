@@ -79,3 +79,17 @@ management:
   endpoint:
     health:
       show-details: always
+
+
+grpc:
+  client:
+#    analyzer: # <- должно соответствовать значению в @GrpcClient
+#      address: 'discovery:///analyzer' # адрес gRPC-сервиса
+#      enableKeepAlive: true
+#      keepAliveWithoutCalls: true
+#      negotiation-type: plaintext
+    collector: # <- должно соответствовать значению в @GrpcClient
+      address: 'discovery:///collector' # адрес gRPC-сервиса
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiation-type: plaintext

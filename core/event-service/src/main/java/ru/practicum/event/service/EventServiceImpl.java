@@ -1,6 +1,5 @@
 package ru.practicum.event.service;
 
-
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,11 +9,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import ru.practicum.client.StatsClient;
+import ru.practicum.client.CollectorClient;
+import ru.practicum.client.RecomendationsClient;
 import ru.practicum.event.client.category.CategoryClient;
 
-import ru.practicum.compilations.dto.EndpointHitDto;
-import ru.practicum.compilations.dto.ViewStatsDto;
 import ru.practicum.event.client.user.UserClient;
 import ru.practicum.event.dto.ext.*;
 import ru.practicum.event.repository.EventRepository;
@@ -22,6 +20,7 @@ import ru.practicum.event.repository.EventSpecification;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.model.*;
 import ru.practicum.event.model.entity.Event;
+import ru.practicum.ewm.stats.proto.RecommendedEventProto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
@@ -42,7 +41,9 @@ import static ru.practicum.event.model.EventMapper.toEventShortDto;
 public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
-    private final StatsClient statsClient;
+
+    private final CollectorClient collectorClient;
+    private final RecomendationsClient recomendationsClient;
 
     private final UserClient userClient;
     private final CategoryClient categoryClient;
@@ -69,13 +70,12 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getAllEvents(RequestPublicParams params, HttpServletRequest request) {
+    public List<EventShortDto> getAllEvents(RequestPublicParams params) {
         if (params.getRangeStart() != null && params.getRangeEnd() != null
                 && params.getRangeStart().isAfter(params.getRangeEnd())) {
             throw new ValidationException("rangeStart must not be after rangeEnd");
         }
         Pageable pageable;
-        saveHit(request);
 
         if (params.getEventSort() == EventSort.EVENT_DATE) {
             pageable = PageRequest.of(params.getFrom() / params.getSize(), params.getSize(),
@@ -99,7 +99,7 @@ public class EventServiceImpl implements EventService {
 
         if (params.getEventSort() != EventSort.EVENT_DATE) {
             dtos = dtos.stream()
-                    .sorted(Comparator.comparing(EventShortDto::getViews).reversed())
+                    .sorted(Comparator.comparing(EventShortDto::getRating).reversed())
                     .toList();
         }
 
@@ -237,22 +237,18 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findEventByIdAndState(eventId, State.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Event not found with id: " + eventId));
 
-        saveHit(request);
+        collectorClient.collectUserAction(Long.parseLong(request.getHeader("X-EWM-USER-ID")),
+                eventId,
+                "ACTION_VIEW");
 
-        Long statsViews = statsClient.getStats(
-                        STATS_DATE_FROM,
-                        LocalDateTime.now().format(DATE_TIME_FORMATTER),
-                        List.of("/events/" + eventId), true)
-                .stream()
-                .findFirst()
-                .map(ViewStatsDto::getHits)
-                .orElse(0L);
+        Double interactionCount = recomendationsClient.getInteractionsCount(List.of(eventId))
+                .map(RecommendedEventProto::getScore).findFirst().orElse(0.0);
 
         CategoryDto categoryDto = categoryClient.getById(event.getCategory());
         UserShortDto userShortDto = userClient.getShortUserById(event.getInitiatorId());
 
         EventFullDto dto = toEventFullDto(event, categoryDto, userShortDto);
-        dto.setViews(statsViews);
+        dto.setRating(interactionCount);
         return dto;
     }
 
@@ -384,6 +380,22 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toSet());
     }
 
+    @Override
+    public List<RecommendedEventDto> getRecommendations(Long userId, Integer maxResults) {
+        return recomendationsClient.getRecommendationsForUser(userId, maxResults)
+                .map(EventMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public void collectUserAction(Long userId, Long eventId) {
+        RequestDto requestDto = requestClient.getEventRequests(eventId).stream()
+                .filter(r -> r.getEvent().equals(eventId)
+                        && r.getRequester().equals(userId)).findFirst()
+                .orElseThrow(() -> new ValidationException(
+                        String.format("Пользователь %s не запрашивал мероприятие %s", userId, eventId)));
+        collectorClient.collectUserAction(userId, eventId, "ACTION_LIKE");
+    }
 
     private Event getEventById(Long eventId) {
         return eventRepository.findById(eventId)
@@ -408,19 +420,10 @@ public class EventServiceImpl implements EventService {
         if (dto.isEmpty()) return;
 
         List<Long> eventIds = dto.stream().map(BaseDto::getId).toList();
-        List<String> uris = eventIds.stream()
-                .map(id -> "/events/" + id)
-                .toList();
 
-        List<ViewStatsDto> stats = statsClient.getStats(
-                STATS_DATE_FROM,
-                LocalDateTime.now().format(DATE_TIME_FORMATTER),
-                uris,
-                true
-        );
-
-        Map<String, Long> uriToViews = stats.stream()
-                .collect(Collectors.toMap(ViewStatsDto::getUri, ViewStatsDto::getHits));
+        Map<Long, Double> interactionCountsMap = recomendationsClient.getInteractionsCount(eventIds)
+                .collect(Collectors.toMap(RecommendedEventProto::getEventId,
+                        RecommendedEventProto::getScore));
 
         Map<Long, Long> confirmedRequestsCount = requestClient.findRequestByStatus(
                         eventIds, RequestStatus.CONFIRMED)
@@ -428,7 +431,7 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.groupingBy(RequestDto::getEvent, Collectors.counting()));
 
         for (BaseDto d : dto) {
-            d.setViews(uriToViews.getOrDefault("/events/" + d.getId(), 0L));
+            d.setRating(interactionCountsMap.getOrDefault(d.getId(), 0.0));
             d.setConfirmedRequests(confirmedRequestsCount.getOrDefault(d.getId(), 0L));
         }
     }
@@ -445,14 +448,4 @@ public class EventServiceImpl implements EventService {
         if (req.getTitle() != null) event.setTitle(req.getTitle());
     }
 
-    private void saveHit(HttpServletRequest request) {
-        EndpointHitDto endpointHitdto = EndpointHitDto.builder()
-                .app("main-service")
-                .uri(request.getRequestURI())
-                .ip(request.getRemoteAddr())
-                .timestamp(LocalDateTime.now())
-                .build();
-
-        statsClient.saveHit(endpointHitdto);
-    }
 }

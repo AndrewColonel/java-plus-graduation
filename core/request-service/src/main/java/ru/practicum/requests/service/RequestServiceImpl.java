@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 
+import ru.practicum.client.CollectorClient;
 import ru.practicum.requests.client.event.EventClient;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.EntityNotExistsException;
@@ -35,6 +36,8 @@ public class RequestServiceImpl implements RequestService {
     private final UserClient userClient;
     private final RequestRepository requestRepository;
     private final EventClient eventClient;
+
+    private final CollectorClient collectorClient;
 
     /**
      * Получение информации о заявках текущего пользователя на участие в чужих событиях
@@ -111,6 +114,8 @@ public class RequestServiceImpl implements RequestService {
 
         requestRepository.save(newRequest);
         RequestDto dto = RequestMapper.toDto(newRequest);
+
+        collectorClient.collectUserAction(userId, eventId,"ACTION_REGISTER");
 
         return dto;
     }

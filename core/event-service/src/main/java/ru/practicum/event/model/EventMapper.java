@@ -4,8 +4,10 @@ import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.ext.CategoryDto;
+import ru.practicum.event.dto.ext.RecommendedEventDto;
 import ru.practicum.event.dto.ext.UserShortDto;
 import ru.practicum.event.model.entity.Event;
+import ru.practicum.ewm.stats.proto.RecommendedEventProto;
 
 import java.util.Map;
 
@@ -56,7 +58,7 @@ public class EventMapper {
                 .publishedOn(event.getPublishedOn())
                 .location(event.getLocation())
                 .requestModeration(event.getRequestModeration())
-                .views(0L)
+                .rating(0.0)
                 .confirmedRequests(0L)
                 .build();
     }
@@ -78,7 +80,7 @@ public class EventMapper {
                 .publishedOn(event.getPublishedOn())
                 .location(event.getLocation())
                 .requestModeration(event.getRequestModeration())
-                .views(0L)
+                .rating(0.0)
                 .confirmedRequests(0L)
                 .build();
     }
@@ -95,6 +97,13 @@ public class EventMapper {
                 .participantLimit(newEventDto.getParticipantLimit() != null ? newEventDto.getParticipantLimit() : 0)
                 .requestModeration(newEventDto.getRequestModeration() != null ? newEventDto.getRequestModeration() : true)
                 .title(newEventDto.getTitle())
+                .build();
+    }
+
+    public static RecommendedEventDto toDto(RecommendedEventProto recommendedEventProto) {
+        return RecommendedEventDto.builder()
+                .eventId(recommendedEventProto.getEventId())
+                .score(recommendedEventProto.getScore())
                 .build();
     }
 }
